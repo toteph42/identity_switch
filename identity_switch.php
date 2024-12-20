@@ -335,6 +335,8 @@ class identity_switch extends identity_switch_prefs
 		foreach ($folders as $mbox)
 			$unseen += $storage->count($mbox, 'UNSEEN', true, false);
 		self::set($iid, 'unseen', $unseen);
+		$rc->output->command('plugin.identity_switch_upd_unseen', $iid, $unseen);
+
         self::set($iid, 'checked_last', time());
 
 		// get new account

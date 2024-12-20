@@ -1,5 +1,11 @@
 # Changelog identity switch plugin
 
+## Release 1.1.4
+
+- Fixed: Closing stream error
+- Added: Update of unseen couter from leaving identity 
+- Added: Cast 'newmail_check' variable to integer
+
 ## Release 1.1.3
 
 - Changed: Updating newmail count on identity switch improved

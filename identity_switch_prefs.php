@@ -357,8 +357,8 @@ class identity_switch_prefs extends rcube_plugin
 
         if (!empty($val = rcube_utils::get_input_value('_refresh_interval', rcube_utils::INPUT_POST)))
         {
-        	$args['prefs']['refresh_interval'] = $val * 60;
-        	self::set($iid, 'newmail_check', $rec['newmail_check'] = $val * 60);
+        	$args['prefs']['refresh_interval'] = (int)$val * 60;
+        	self::set($iid, 'newmail_check', $rec['newmail_check'] = (int)$val * 60);
         }
 
 		if ($iid != $this->default)
@@ -570,7 +570,7 @@ class identity_switch_prefs extends rcube_plugin
 				if (strcasecmp('ssl', $url['scheme']) === 0)
 					self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_SSL);
 				self::set($iid, 'imap_delim', $cfg['delimiter']);
-				self::set($iid, 'newmail_check', $cfg['interval']);
+				self::set($iid, 'newmail_check', (int)$cfg['interval']);
 
 				$url = parse_url($cfg['smtp']);
 				self::set($iid, 'smtp_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
@@ -949,8 +949,8 @@ class identity_switch_prefs extends rcube_plugin
 			$rec['flags'] |= self::NOTIFY_DESKTOP;
 		if (self::get_field_value($iid, 'notify_sound'))
 			$rec['flags'] |= self::NOTIFY_SOUND;
-		$rec['notify_timeout'] = self::get_field_value($iid, 'notify_timeout');
-		$rec['newmail_check'] = self::get_field_value($iid, 'refresh_interval') * 60;
+		$rec['notify_timeout'] = (int)self::get_field_value($iid, 'notify_timeout');
+		$rec['newmail_check'] = (int)self::get_field_value($iid, 'refresh_interval') * 60;
 
 		return $rec;
 	}

@@ -50,6 +50,13 @@ function identity_switch_init() {
             if (rcmail.message_list)
                 rcmail.message_list.addEventListener('select', identity_switch_stop_notify);
     });
+	// Update unseen counter
+	rcmail.register_command('plugin.identity_switch_upd_unseen', function() {
+		function identity_switch_upd(iid, cnt) {
+			var c = $("#identity_switch_opt_" + iid);
+			c.val = cnt;	
+		}
+	});
 }
 
 // Set menu position
