@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.5
+
+- Added: Debug section in README.MD
+- Added: Configuration parameter 'wait'
+
 ## Release 1.1.4
 
 - Fixed: Closing stream error

@@ -60,13 +60,13 @@ If you receive new mails, the number of new mails will be shown in identity sele
 
 ### Configuration ###
 
-There is a file `config.inc.php` in the plugin directory available. This file can be used to specify some configuration settings.
+There is a file `config.inc.php.dist` in the plugin directory available with mutiple configuration parameters. This file can be used to specify some configuration settings. Please copy file to `config.inc.php` and change there your settings.
 
 If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, `alert.ico` and `alert.gif` in sub-directory `assets`.
 
 ### Locking configuration ###
 
-You may use the `dont_override` configuration option in your `config/config.inc.php` file to lock some options from being overriden. This plugins supports the following options to be protected:
+You may use the `dont_override` configuration option in your **RoundCube** configuration file `config/config.inc.php` to lock some options from being overriden. This plugins supports the following options to be protected:
 
 * `draft_mbox`, `sent_mbox`, `junk_mbox`, `trash_mbox` - User cannot override preconfigured special folder name.
 * `check_all_folders` - User cannot override preconfigured flag to check all folders.
@@ -86,7 +86,7 @@ Please don't forget to set `Special Folders` in `Settings` -> `Preferences`. All
 
 ### Limitations ###
 
-This plugin only supports `Classic`, `Elatic`, `Larry` and `Hivemail` skin. If you wan't to get another skin to be supoorted, then please contact me. 
+This plugin only supports `Classic`, `Elatic`, `Larry` and `Hivemail` skin. If you wan't to get another skin to be supoorted, then please contact me. I can add support for other skin if you buy for it.
 
 ### Migration from ident_switch plugin ###
 
@@ -100,6 +100,23 @@ are scrpst avaibale to ugrade your installation. These scriüps must called manu
 ### License ###
 
 This plugin is released under the [GNU General Public License v3.0](./LICENSE).
+
+### Debugging ###
+
+If you encounter problems with plugin, take a look at the option available in `config.inc.php`. 
+
+If you encounter **connection problems**, it is a good idea to enable **RoundCube** available debugging options:
+
+```php
+// Log IMAP conversation to <log_dir>/imap.log or to syslog
+$config['imap_debug'] = true;
+// Log sent messages to <log_dir>/sendmail.log or to syslog
+$config['smtp_log'] = true;
+
+// Log SMTP conversation to <log_dir>/smtp or to syslog
+$config['smtp_debug'] = true;
+```
+Then switch to the identity which does not work as expected. In log files you'll see how **RoundCube** is trying to establish connection.
 
 ### Donation ###
 

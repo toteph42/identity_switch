@@ -1169,15 +1169,17 @@ class identity_switch_prefs extends rcube_plugin
 			foreach ($rc->config->get('identity_switch.config', []) as $k => $v)
 			{
 				if ($k == 'logging' || $k == 'debug')
-					self::set('config', $k, $v, false);
+					self::set('config', $k, (bool)$v, false);
 				if ($k == 'check')
-					self::set('config', $k, $v, true);
+					self::set('config', $k, (bool)$v, true);
 				if ($k == 'interval')
-					self::set('config', $k, $v, 30);
+					self::set('config', $k, (int)$v, 30);
 				if ($k == 'delay')
-					self::set('config', $k, $v, 0);
+					self::set('config', $k, (int)$v, 0);
 				if ($k == 'retries')
-					self::set('config', $k, $v, 10);
+					self::set('config', $k, (int)$v, 10);
+				if ($k == 'wait')
+					self::set('config', $k, (int)$v, 60);
 			}
 			self::set('iid', 0);
 			self::set('config', 'language', $_SESSION['language']);
@@ -1206,8 +1208,9 @@ class identity_switch_prefs extends rcube_plugin
 			'folders'			=> [],									// special folder name array
 			'unseen'			=> 0,									// # of unseen messages
 			'checked_last'		=> 0,									// last time checked
-			'notify'			=> false,									// notify user flag
+			'notify'			=> false,								// notify user flag
 		];
+
 		// save defaults
 		foreach ($rc as $k => $v)
 			self::set($sect, $k, $v);

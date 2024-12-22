@@ -19,6 +19,7 @@ declare(strict_types=1);
  * 		interval		specify interval for checking of new mails
  * 		delay			delay between each new mail check
  * 		retries			specify no. of retries for reading data from mail server
+ * 		wait			max. number of seconds to wait for response from identity_switch_newmails.php
  * 		language		language used
  * 		cache	 		all session variables used by identity switch
  * 		data	  		unseen exchange data file
@@ -531,7 +532,7 @@ class identity_switch extends identity_switch_prefs
 		$n = 0;
 		while (!file_exists($cfg['data']))
 		{
-			if ($n++ > 60)
+			if ($n++ > self::get('wait')
 			{
 				self::write_log('No data file exist - stop checking', true);
 				return $args;
