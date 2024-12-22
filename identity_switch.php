@@ -532,7 +532,7 @@ class identity_switch extends identity_switch_prefs
 		$n = 0;
 		while (!file_exists($cfg['data']))
 		{
-			if ($n++ > self::get('wait')
+			if ($n++ > self::get('wait'))
 			{
 				self::write_log('No data file exist - stop checking', true);
 				return $args;

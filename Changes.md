@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.6
+
+- Fixed: Typo in identity_switch.php
+
 ## Release 1.1.5
 
 - Added: Debug section in README.MD
