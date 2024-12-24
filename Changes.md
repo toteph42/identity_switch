@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.7
+
+- Update: Mariadb version 10.6.19 support
+
 ## Release 1.1.6
 
 - Fixed: Typo in identity_switch.php
