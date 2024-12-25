@@ -285,6 +285,7 @@ class identity_switch extends identity_switch_prefs
 	{
 		// build identity table
 		$acc = [];
+		sleep(1);
 		foreach (self::get() as $iid => $rec)
 		{
 			// identity switch enabled?
@@ -336,7 +337,6 @@ class identity_switch extends identity_switch_prefs
 		foreach ($folders as $mbox)
 			$unseen += $storage->count($mbox, 'UNSEEN', true, false);
 		self::set($iid, 'unseen', $unseen);
-		$rc->output->command('plugin.identity_switch_upd_unseen', $iid, $unseen);
 
         self::set($iid, 'checked_last', time());
 
@@ -505,10 +505,10 @@ class identity_switch extends identity_switch_prefs
 			    self::set('config', 'fp', $cfg['fp'] = new identity_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log('New mail chking error - '.$cfg['fp'].' for '.$host.' - stop checking');
+					$this->write_log('Cannot open connection - '.$cfg['fp'].' for '.$host.' - stop checking');
 					return $args;
 				}
-				self::write_log('Host "'.$host.'" opened', true);
+				self::write_log('Host "'.$host.'" connected', true);
 			}
 
 			// save data for background sharing
@@ -520,7 +520,8 @@ class identity_switch extends identity_switch_prefs
 			$req = '/plugins/identity_switch/identity_switch_newmails.php?iid=0&cache='.urlencode($cfg['cache']);
 			if (!$cfg['fp']->write($req))
 			{
-				fclose($cfg['fp']);
+				if (is_resource($cfg['fp']))
+					fclose($cfg['fp']);
 				self::set('config', 'fp', $cfg['fp'] = 0);
 				$this->write_log('Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
 				return $args;

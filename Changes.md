@@ -1,5 +1,11 @@
 # Changelog identity switch plugin
 
+## Release 1.1.8
+
+- Fixed: Typo in identity_switch_newmails.php:88
+- Added: Object check in identity_switch.php:523
+- Added: Sleep() call to create_menu() - was too fast
+
 ## Release 1.1.7
 
 - Update: Mariadb version 10.6.19 support
