@@ -85,7 +85,7 @@ class identity_switch_newmails extends identity_switch_rpc {
 					   '&cache='.urlencode($this->file);
 				if (!$res[$iid]->write($req))
 				{
-					if (is_resource($rec[$iid]))
+					if (is_resource($res[$iid]))
 						fclose($res[$iid]);
 					self::write_data('0##Identity: '.$iid.' Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
 					return;

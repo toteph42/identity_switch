@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.9
+
+- Fixed: Typo in identity_switch_newmails.php:88
+
 ## Release 1.1.8
 
 - Fixed: Typo in identity_switch_newmails.php:88
