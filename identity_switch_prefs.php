@@ -1188,6 +1188,7 @@ class identity_switch_prefs extends rcube_plugin
 					  '/identity_switch_cache.'.session_id());
 			self::set('config', 'data',  str_replace('_cache', '_ret', $c));
 			self::set('config', 'fp', 0);
+			self::set('lock', 0);
 		}
 
 		if (!is_numeric($sect))

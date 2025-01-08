@@ -25,6 +25,7 @@ declare(strict_types=1);
  * 		data	  		unseen exchange data file
  * 		fp				file pointer
  * 	iid					active identity
+ *  lock				lock all activities
  * 	[n]					cached identity data
  * 		label			label
  * 		flags			glags
@@ -130,11 +131,14 @@ class identity_switch extends identity_switch_prefs
 
 			$this->add_texts('localization');
 
-			// not the first call?
-			if (isset($_SESSION[identity_switch_prefs::TABLE]['iid']) && $_SESSION[identity_switch_prefs::TABLE]['iid'] > 0)
+			if (self::get('iid') > 0)
 			{
 				if ($args['template'] == 'mail')
+				{
+					while (self::get('lock'))
+						usleep(100);
 					self::create_menu();
+				}
 				break;
 			}
 
@@ -285,7 +289,6 @@ class identity_switch extends identity_switch_prefs
 	{
 		// build identity table
 		$acc = [];
-		sleep(1);
 		foreach (self::get() as $iid => $rec)
 		{
 			// identity switch enabled?
@@ -328,6 +331,8 @@ class identity_switch extends identity_switch_prefs
 		$rc->session->remove('unseen_count');
 
 		// update current unseen counter
+		self::set('lock', 1);
+
 		$iid = self::get('iid');
 		$folders = [ 'INBOX' ];
 		$storage = $rc->get_storage();
@@ -337,16 +342,16 @@ class identity_switch extends identity_switch_prefs
 		foreach ($folders as $mbox)
 			$unseen += $storage->count($mbox, 'UNSEEN', true, false);
 		self::set($iid, 'unseen', $unseen);
-
         self::set($iid, 'checked_last', time());
 
 		// get new account
 		$rec = self::get($iid = rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST));
-
-		$this->write_log('Switching to identity "'.$rec['imap_user'].'"');
-
 		// swap data
 		self::swap($iid, $rec);
+
+		self::set('lock', 0);
+
+		$this->write_log('Switching to identity "'.$rec['imap_user'].'"');
 
 		$rc->output->redirect(
 			[
