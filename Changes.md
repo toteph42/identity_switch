@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.11
+
+- Changed: Active identity is now also show in list of selctable identities
+
 ## Release 1.1.10
 
 - Changed: Updates to menu bar
