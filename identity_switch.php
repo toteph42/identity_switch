@@ -221,7 +221,7 @@ class identity_switch extends identity_switch_prefs
 				self::set($iid, 'flags', self::get($iid, 'flags') | self::CHECK_ALLFOLDER);
 			foreach ([ 'basic' 	 => self::NOTIFY_BASIC,
 					   'desktop' => self::NOTIFY_DESKTOP,
-		        		   'sound' 	 => self::NOTIFY_SOUND] as $k => $v)
+		        	   'sound' 	 => self::NOTIFY_SOUND] as $k => $v)
 	        {
 	            if (isset($prefs[$p.$k]) && $prefs[$p.$k] == 1)
 					self::set($iid, 'flags', self::get($iid, 'flags') | $v);
@@ -230,8 +230,8 @@ class identity_switch extends identity_switch_prefs
 	            self::set($iid, 'notify_timeout', $prefs[$p.'_desktop_timeout']);
 
 	        // swap new mail check interval
-			self::set($iid, 'newmail_check', isset($prefs['refresh_interval']) ? $prefs['refresh_interval'] :
-			$rc->config->get('refresh_interval'));
+			self::set($iid, 'newmail_check', (int)(isset($prefs['refresh_interval']) ? $prefs['refresh_interval'] :
+			$rc->config->get('refresh_interval')));
 
 			// swap special folder names
 			$box = [];
@@ -311,7 +311,7 @@ class identity_switch extends identity_switch_prefs
 			foreach ($acc as $name => $rec)
 				$div .= '<li onclick="identity_switch_run('.$rec['iid'].');"><a href="#">'.$name.
 				  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen">'.
-				  	   	($rec['unseen'] > 0 ? $rec['unseen'] : '').'</span></a></li>';
+				  	   	($rec['iid'] == $iid ? 0 : ($rec['unseen'] > 0 ? $rec['unseen'] : '')).'</span></a></li>';
 
 			rcmail::get_instance()->output->add_footer($div.'</ul></div></div>');
 		}

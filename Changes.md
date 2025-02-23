@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.12
+
+- Added: Additional interegre cast when loading parameter "refresh_interval" from RC
+- Chaged: Removing # of unread mail from selected identity when switching
+
 ## Release 1.1.11
 
 - Changed: Active identity is now also show in list of selctable identities
