@@ -14,7 +14,7 @@ class identity_switch_prefs extends rcube_plugin
 
 	private $default = 0;							// default identity
 
-	const TABLE = 'identity_switch';					// where to store in $_SESSION
+	const TABLE = 'identity_switch';				// where to store in $_SESSION
 	const USR 	= -1; 								// dummy user
 
 	// user flags in database
@@ -63,7 +63,7 @@ class identity_switch_prefs extends rcube_plugin
 		{
 			$rc 		   = rcmail::get_instance();
 			$this->default = $rc->user->get_identity();
-			$this->default = $this->default['identity_id'];
+			$this->default = isset($this->default['identity_id']) ? isset($this->default['identity_id']) : null;
 		}
 	}
 

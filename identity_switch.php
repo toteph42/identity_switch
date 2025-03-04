@@ -311,8 +311,9 @@ class identity_switch extends identity_switch_prefs
 			foreach ($acc as $name => $rec)
 				$div .= '<li onclick="identity_switch_run('.$rec['iid'].');"><a href="#">'.$name.
 				  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen">'.
-				  	   	($rec['iid'] == $iid ? 0 : ($rec['unseen'] > 0 ? $rec['unseen'] : '')).'</span></a></li>';
+				  	   	($rec['iid'] == $iid ? "" : ($rec['unseen'] > 0 ? $rec['unseen'] : '')).'</span></a></li>';
 
+			self::set($iid, 'unseen', 0);
 			rcmail::get_instance()->output->add_footer($div.'</ul></div></div>');
 		}
 	}

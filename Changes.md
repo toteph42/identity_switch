@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.13
+
+- Added; Work around if login user has no assigned identity
+
 ## Release 1.1.12
 
 - Added: Additional interegre cast when loading parameter "refresh_interval" from RC
