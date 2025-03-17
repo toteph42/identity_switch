@@ -1,12 +1,16 @@
 # Changelog identity switch plugin
 
+## Release 1.1.14
+
+- Fixed: Temp. not possible to edit / create any identity
+
 ## Release 1.1.13
 
 - Added; Work around if login user has no assigned identity
 
 ## Release 1.1.12
 
-- Added: Additional interegre cast when loading parameter "refresh_interval" from RC
+- Added: Additional inteer cast when loading parameter "refresh_interval" from RC
 - Chaged: Removing # of unread mail from selected identity when switching
 
 ## Release 1.1.11

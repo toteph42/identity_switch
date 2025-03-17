@@ -63,7 +63,7 @@ class identity_switch_prefs extends rcube_plugin
 		{
 			$rc 		   = rcmail::get_instance();
 			$this->default = $rc->user->get_identity();
-			$this->default = isset($this->default['identity_id']) ? isset($this->default['identity_id']) : null;
+			$this->default = isset($this->default['identity_id']) ? $this->default['identity_id'] : null;
 		}
 	}
 
