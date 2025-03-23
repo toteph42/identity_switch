@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.15
+
+- Fixed: Typo in compser URL
+- Changed: Setting "newmail_check" to default, f no value is given
+
 ## Release 1.1.14
 
 - Fixed: Temp. not possible to edit / create any identity

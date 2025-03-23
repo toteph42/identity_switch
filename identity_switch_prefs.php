@@ -145,6 +145,10 @@ class identity_switch_prefs extends rcube_plugin
 										  ]
         	];
 
+	    // set default, if no parameter is given
+	    if (!isset($rec['newmail_check']) || !is_numeric($rec['newmail_check']))
+	    	$rec['newmail_check'] = 300;
+
 		$args['blocks']['main']['options']['refresh_interval'] = [
                         'title'   => html::label('_refresh_interval', rcube::Q($this->gettext('refreshinterval'))),
                         'content' => $sel->show($rec['newmail_check'] / 60),
