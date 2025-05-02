@@ -686,7 +686,7 @@ class identity_switch_prefs extends rcube_plugin
 			'imap_port' 	=> [ 'label' => $this->gettext('idsw.imap.port'),
 								 'type' => 'text', 'maxlength' => 5 ],
 			'imap_user' 	=> [ 'label' => $this->gettext('idsw.imap.user'),
-								 'type' => 'text', 'maxlength' => 32 ],
+								 'type' => 'text', 'maxlength' => 64 ],
 			'imap_pwd' 		=> [ 'label' => $this->gettext('idsw.imap.pwd'),
 								 'type' => 'password', 'maxlength' => 128 ],
 			'imap_delim'	=> [ 'label' => $this->gettext('idsw.imap.delim'),
@@ -1135,9 +1135,13 @@ class identity_switch_prefs extends rcube_plugin
 				$_SESSION[self::TABLE][$sect] = [];
 			foreach ($var as $k => $v)
 				$_SESSION[self::TABLE][$sect][$k] = is_null($v) ? $default : $v;
-		} elseif (is_null($val))
+		} elseif (is_null($val)) {
+			if ($sect == 'lock' && $val == 1 && isset($_SESSION[self::TABLE][$sect])) {
+				while ($_SESSION[self::TABLE][$sect] == 1)
+					usleep(100);
+			}
 			$_SESSION[self::TABLE][$sect] = $var;
-		else
+		} else
 			$_SESSION[self::TABLE][$sect][$var] = $val;
 	}
 

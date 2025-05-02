@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.16
+
+- Changed: Locking enhanced
+- Changed: Imap user field now accepts 64 characters
+
 ## Release 1.1.15
 
 - Fixed: Typo in compser URL
