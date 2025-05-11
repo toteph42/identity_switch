@@ -791,11 +791,12 @@ class identity_switch_prefs extends rcube_plugin
 		// no record exists, create new one
 		else if ($rec['flags'] & self::ENABLED)
 		{
+			// #58
 			$sql = 'INSERT INTO '.
 				$rc->db->table_name(self::TABLE).
 				'(flags, label, imap_host, imap_port, imap_delim, imap_user, imap_pwd,'.
 				' smtp_host, smtp_port, notify_timeout, newmail_check, user_id, iid)'.
-				' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+				' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		}
 
 		// did we write anything?
@@ -958,7 +959,6 @@ class identity_switch_prefs extends rcube_plugin
 
 		return $rec;
 	}
-
 
 	/**
 	 * 	Get field value in settings

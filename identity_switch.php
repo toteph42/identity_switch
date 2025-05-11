@@ -570,7 +570,7 @@ class identity_switch extends identity_switch_prefs
 				}
 
 				$rec = &self::get($r[1]);
-				if ($r[2] != $rec['unseen'])
+				if ($r[2] != $rec['unseen'] && $r[0] > $rec['checked_last'])
 				{
 					if ($r[2] > $rec['unseen'])
 					{
@@ -582,7 +582,8 @@ class identity_switch extends identity_switch_prefs
 					}
 					self::set($r[1], 'unseen', $r[2]);
 				}
-				self::set($r[1], 'checked_last', $r[0]);
+				if ($r[0] > $rec['checked_last'])
+					self::set($r[1], 'checked_last', $r[0]);
 			}
 
 			self::write_log('Starting notification.', true);

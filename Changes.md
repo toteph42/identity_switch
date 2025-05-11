@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.17
+
+- Changed: Updates on cache
+- Fixed: INSERT into table
+
 ## Release 1.1.16
 
 - Changed: Locking enhanced
