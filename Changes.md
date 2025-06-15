@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.18
+
+- Fixed SQL error
+
 ## Release 1.1.17
 
 - Changed: Updates on cache
