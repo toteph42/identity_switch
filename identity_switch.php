@@ -569,7 +569,10 @@ class identity_switch extends identity_switch_prefs
 					continue;
 				}
 
-				$rec = &self::get($r[1]);
+				// #062 Notice: Only variables should be assigned by reference
+				self::get($r[1]);
+				$rec = $_SESSION[self::TABLE][$r[1]];
+
 				if ($r[2] != $rec['unseen'] && $r[0] > $rec['checked_last'])
 				{
 					if ($r[2] > $rec['unseen'])

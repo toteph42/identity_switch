@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.19
+
+- Fixed PHP notice
+
 ## Release 1.1.18
 
 - Fixed SQL error

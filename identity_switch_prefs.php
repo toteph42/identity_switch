@@ -641,7 +641,7 @@ class identity_switch_prefs extends rcube_plugin
 		$fields = [ 'label' => [ 'label' => $this->gettext('idsw.common.label'),
 								 'type'  => 'text', 'maxlength' => 32 ], ];
 
- 		if ($default)
+ 		if (isset($default))
 			return $fields;
 
         $ise = $rec['flags'] & self::ENABLED ? '1' : '0';
