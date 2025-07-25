@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.20
+
+- Fixed missing 'enable' button
+
 ## Release 1.1.19
 
 - Fixed PHP notice

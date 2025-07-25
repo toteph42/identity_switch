@@ -630,7 +630,7 @@ class identity_switch_prefs extends rcube_plugin
 	        $rec = self::get($args['record']['identity_id']);
 	        $ro  = '';
 			// is this default identity?
-			$default = $args['record']['identity_id'] == $this->default;
+			$default = (bool)($args['record']['identity_id'] == $this->default);
 		} else
 		{
 			$rec = self::get(self::USR);
@@ -641,7 +641,7 @@ class identity_switch_prefs extends rcube_plugin
 		$fields = [ 'label' => [ 'label' => $this->gettext('idsw.common.label'),
 								 'type'  => 'text', 'maxlength' => 32 ], ];
 
- 		if (isset($default))
+ 		if ($default)
 			return $fields;
 
         $ise = $rec['flags'] & self::ENABLED ? '1' : '0';
@@ -735,13 +735,9 @@ class identity_switch_prefs extends rcube_plugin
 	{
 		$rc = rcmail::get_instance();
 
- 		if (!self::get_field_value('0', 'enabled', false))
-		{
-			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
-				   ' SET flags = flags & ? WHERE iid = ? AND user_id = ?';
-			$rc->db->query($sql, ~self::ENABLED, $args['id'], $rc->user->ID);
+		// check, if field 'enabled' is enabled
+		if (!self::get_field_value('0', 'enabled', false))
 			return $args;
-		}
 
 		// check field values
 		$rec = $this->check_field_values();
