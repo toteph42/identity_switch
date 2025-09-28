@@ -4,7 +4,7 @@ declare(strict_types=1);
 /*
  * 	Identity switch RoundCube Bundle
  *
- *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+ *	@copyright	(c) 2024 - 2025 Florian Daeumling, Germany. All right reserved
  * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
@@ -28,7 +28,7 @@ declare(strict_types=1);
  *  lock				lock all activities
  * 	[n]					cached identity data
  * 		label			label
- * 		flags			glags
+ * 		flags			flags
  * 		imap_user		IMAP user
  * 		imap_pwd		IMAP password
  * 		imap_host		IMAP host
@@ -128,7 +128,6 @@ class identity_switch extends identity_switch_prefs
 		switch ($rc->task)
 		{
 		case 'mail':
-
 			$this->add_texts('localization');
 
 			if (self::get('iid') > 0)
@@ -167,7 +166,7 @@ class identity_switch extends identity_switch_prefs
 				self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_TLS);
 			self::set($iid, 'imap_delim', $_SESSION['imap_delimiter']);
 
-			// Sswap SMTP data
+			// swap SMTP data
 			$hosts = $rc->config->get('smtp_host');
 			if (!is_array ($hosts))
 				$hosts = [ $_SESSION['storage_host'] => $hosts ];

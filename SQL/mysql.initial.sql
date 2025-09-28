@@ -1,15 +1,15 @@
 --
 -- 	Identity switch RoundCube Bundle
 --
---	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+--	@copyright	(c) 2024 - 2025 Florian Daeumling, Germany. All right reserved
 -- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
 --
 --  Created with phpmyadmin
 
 CREATE TABLE IF NOT EXISTS `identity_switch`(
-    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `user_id` INT(10) UNSIGNED NOT NULL,
-    `iid` INT(10) UNSIGNED NOT NULL,
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `iid` INT UNSIGNED NOT NULL,
     `label` VARCHAR(32) NOT NULL,
     `flags` INT NOT NULL DEFAULT 0,
     `imap_user` VARCHAR(64),
