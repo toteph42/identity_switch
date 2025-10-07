@@ -1,5 +1,11 @@
 # Changelog identity switch plugin
 
+## Release 2.0.1
+
+* Now you can use seperate IMAP and SMTP credentials
+* Enables saving of disabled identity
+* Fixed sqlite problems
+
 ## Release 1.1.21
 
 * Fixed issue #38

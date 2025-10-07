@@ -32,15 +32,6 @@ class identity_switch_prefs extends rcube_plugin
 	const UNSEEN				= 0x4000;			// unssen check performed
 	const DEFAULT				= 0x8000;			// default identity
 
-	/* 	20240629.sql
-
-		0x14 20 - IMAP_SSL | SAME_AS_IMAP 	-> 0x24 20 IMAP_SSL | SMTP_SSL
-		0x18 24 - IMAP_TLS | SAME_AS_IMAP	-> 0x28 40 IMAP_TLS | SMTP_TLS
-		0x10 16 - NONE 	   | SAME_AS_IMAP	-> 0x00 NONE        | NONE
-		0x04 04 - IMAP_SSL | NONE			-> 0x04 04 IMAP_SSL | NONE
-		0x08 08 - IMAP_TSL | NONE 			-> 0x08 08 IMAP_TLS | NONE
-	*/
-
 	/**
 	 * 	Initialize Plugin
 	 *
@@ -544,19 +535,22 @@ class identity_switch_prefs extends rcube_plugin
 				self::write_log('Applying predefined configuration for "'.$email.'".');
 
 				// set up user name
-				if ($cfg['user'])
+				foreach ( [ 'imap_user', 'smtp_user'] as $usr)
 				{
-					switch (strtoupper($cfg['user']))
+					if ($cfg[$usr])
 					{
-					case 'EMAIL':
-						self::set($iid, 'imap_user', $email);
-						break;
+						switch (strtoupper($cfg[$usr]))
+						{
+						case 'EMAIL':
+							self::set($iid, $usr, $email);
+							break;
 
-					case 'MBOX':
-						self::set($iid, 'imap_user', strstr($email, '@', true));
+						case 'MBOX':
+							self::set($iid, $usr, strstr($email, '@', true));
 
-					default:
-						break;
+						default:
+							break;
+						}
 					}
 				}
 				// check for wild card
@@ -672,25 +666,25 @@ class identity_switch_prefs extends rcube_plugin
 		$authType->add($this->gettext('idsw.imap.auth.ssl'), 'ssl');
 		$authType->add($this->gettext('idsw.imap.auth.tls'), 'tls');
 
-        $args['record']['imap_host'] 	= $rec['imap_host'];
+        $args['record']['imap_user'] 	= $rec['imap_user'];
+        $args['record']['imap_pwd']  	= $rec['imap_pwd'] ? rcmail::get_instance()->decrypt($rec['imap_pwd']) : '';
+		$args['record']['imap_host'] 	= $rec['imap_host'];
         $enc 							= $rec['flags'] & self::IMAP_SSL ? 'ssl' :
 										  ($rec['flags'] & self::IMAP_TLS ? 'tls' : 'none');
         $args['record']['imap_port'] 	= $rec['imap_port'];
-        $args['record']['imap_user'] 	= $rec['imap_user'];
-        $args['record']['imap_pwd'] 	= $rec['imap_pwd'] ? rcmail::get_instance()->decrypt($rec['imap_pwd']) : '';
         $args['record']['imap_delim'] 	= $rec['imap_delim'];
 
 		return [
+			'imap_user' 	=> [ 'label' => $this->gettext('idsw.imap.user'),
+								 'type' => 'text', 'maxlength' => 64 ],
+			'imap_pwd' 		=> [ 'label' => $this->gettext('idsw.imap.pwd'),
+								 'type' => 'password', 'maxlength' => 128 ],
 			'imap_host'	 	=> [ 'label' => $this->gettext('idsw.imap.host'),
 								 'type'  => 'text', 'maxlength' => 64 ],
 			'imap_auth' 	=> [ 'label' => $this->gettext('idsw.imap.auth'),
 								 'value' => $authType->show($enc) ],
 			'imap_port' 	=> [ 'label' => $this->gettext('idsw.imap.port'),
 								 'type' => 'text', 'maxlength' => 5 ],
-			'imap_user' 	=> [ 'label' => $this->gettext('idsw.imap.user'),
-								 'type' => 'text', 'maxlength' => 64 ],
-			'imap_pwd' 		=> [ 'label' => $this->gettext('idsw.imap.pwd'),
-								 'type' => 'password', 'maxlength' => 128 ],
 			'imap_delim'	=> [ 'label' => $this->gettext('idsw.imap.delim'),
 							  	 'type' => 'text', 'maxlength' => 1 ],
 		];
@@ -712,13 +706,19 @@ class identity_switch_prefs extends rcube_plugin
 		$authType->add($this->gettext('idsw.smtp.auth.ssl'), 'ssl');
 		$authType->add($this->gettext('idsw.smtp.auth.tls'), 'tls');
 
-        $args['record']['smtp_host'] = $rec['smtp_host'];
+        $args['record']['smtp_user'] = $rec['smtp_user'];
+        $args['record']['smtp_pwd']  = $rec['smtp_pwd'] ? rcmail::get_instance()->decrypt($rec['smtp_pwd']) : '';
+		$args['record']['smtp_host'] = $rec['smtp_host'];
         $enc 						 = $rec['flags'] & self::SMTP_SSL ? 'ssl' :
 									   ($rec['flags'] & self::SMTP_TLS ? 'tls' : 'none');
         $args['record']['smtp_port'] = $rec['smtp_port'];
 
         return [
-			'smtp_host'	 	=> [ 'label' => $this->gettext('idsw.smtp.host'),
+			'smtp_user' 	=> [ 'label' => $this->gettext('idsw.smtp.user'),
+								 'type' => 'text', 'maxlength' => 64 ],
+			'smtp_pwd' 		=> [ 'label' => $this->gettext('idsw.smtp.pwd'),
+								 'type' => 'password', 'maxlength' => 128 ],
+        	'smtp_host'	 	=> [ 'label' => $this->gettext('idsw.smtp.host'),
 								 'type' => 'text', 'maxlength' => 64 ],
 			'smtp_auth' 	=> [ 'label' => $this->gettext('idsw.smtp.auth'),
 								 'value' => $authType->show($enc) ],
@@ -738,19 +738,28 @@ class identity_switch_prefs extends rcube_plugin
 		$rc = rcmail::get_instance();
 
 		// check, if field 'enabled' is enabled
-		if (!self::get_field_value('0', 'enabled', false))
-			return $args;
-
-		// check field values
-		$rec = $this->check_field_values();
-		if (isset($rec['err']))
+		if ((!self::get_field_value('0', 'enabled', false)))
 		{
-			$this->add_texts('localization');
-			$args['break']   = $args['abort'] = true;
-			$args['message'] = $this->gettext('idsw.err.'.$rec['err']);
-			$args['result']  = false;
+			self::set($args['id'], 'flags', $rec['flags'] = self::get($args['id'], 'flags') & ~self::ENABLED);
+
+			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).' SET flags = ? WHERE iid = ?';
+			$q = $rc->db->query($sql, $rec['flags'], $args['id']);
+			$r = $rc->db->fetch_assoc($q);
 
 			return $args;
+		} else
+		{
+			// check field values
+			$rec = $this->check_field_values();
+			if (isset($rec['err']))
+			{
+				$this->add_texts('localization');
+				$args['break']   = $args['abort'] = true;
+				$args['message'] = $this->gettext('idsw.err.'.$rec['err']);
+				$args['result']  = false;
+
+				return $args;
+			}
 		}
 
 		// any identity_switch data?
@@ -767,22 +776,10 @@ class identity_switch_prefs extends rcube_plugin
 		// if record already exists, we will update it
 		if ($r)
 		{
-			// record enabled?
-			if (count($rec) == 1)
-			{
-				self::set($rec['iid'], 'flags', $rec['flags'] = self::get($rec['iid'], 'flags') & ~self::ENABLED);
-
-				$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).' SET flags = ? WHERE iid = ?';
-				$q = $rc->db->query($sql, $rec['flags'], $rec['iid']);
-				$r = $rc->db->fetch_assoc($q);
-
-				return $args;
-			}
-
 			$sql = 'UPDATE '.
 				$rc->db->table_name(self::TABLE).
-				' SET flags = ?, label = ?, imap_host = ?, imap_port = ?, imap_delim = ?,'.
-				' imap_user = ?, imap_pwd = ?, smtp_host = ?, smtp_port = ?, '.
+				' SET flags = ?, label = ?, imap_user = ?, imap_pwd = ?, imap_host = ?, imap_port = ?, imap_delim = ?,'.
+				' smtp_user = ?, smtp_pwd = ?, smtp_host = ?, smtp_port = ?, '.
 				' notify_timeout = ?, newmail_check = ?, user_id = ?, iid = ?' .
 				' WHERE id = ?';
 		}
@@ -792,9 +789,9 @@ class identity_switch_prefs extends rcube_plugin
 			// #58, #60
 			$sql = 'INSERT INTO '.
 				$rc->db->table_name(self::TABLE).
-				'(flags, label, imap_host, imap_port, imap_delim, imap_user, imap_pwd,'.
-				' smtp_host, smtp_port, notify_timeout, newmail_check, user_id, iid, id)'.
-				' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+				'(flags, label, imap_user, imap_pwd,imap_host, imap_port, imap_delim, '.
+				' smtp_user, smtp_pwd, smtp_host, smtp_port, notify_timeout, newmail_check, user_id, iid, id)'.
+				' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		}
 
 		// did we write anything?
@@ -803,18 +800,25 @@ class identity_switch_prefs extends rcube_plugin
 			// do we need to update password?
 			if (isset($rec['imap_pwd']))
 				$rec['imap_pwd'] = $rc->encrypt($rec['imap_pwd']);
+			if (isset($rec['smtp_pwd']))
+				$rec['smtp_pwd'] = $rc->encrypt($rec['smtp_pwd']);
 
 			$rc->db->query(
 				$sql,
 				$rec['flags'],
 				$rec['label'],
+
+				$rec['imap_user'],
+				$rec['imap_pwd'],
 				$rec['imap_host'],
 				$rec['imap_port'],
 				$rec['imap_delim'],
-				$rec['imap_user'],
-				$rec['imap_pwd'],
+
+				$rec['smtp_user'],
+				$rec['smtp_pwd'],
 				$rec['smtp_host'],
 				$rec['smtp_port'],
+
 				$rec['notify_timeout'],
 				$rec['newmail_check'],
 				$rc->user->ID,
@@ -883,16 +887,27 @@ class identity_switch_prefs extends rcube_plugin
 		if (!($rec['label'] = self::get_field_value($iid, 'label')))
 			$rec['label'] = 'identity_switch';
 
-		if (!($rec['imap_host'] = self::get_field_value($iid, 'imap_host')))
+		if (!($rec['imap_user'] = self::get_field_value($iid, 'imap_user')))
+		{
+			$rec['err'] = 'imap.user.miss';
+			return $rec;
+		}
+		if (!($rec['imap_pwd'] = self::get_field_value($iid, 'imap_pwd', true, true)))
+		{
+			$rec['err'] = 'imap.pwd.miss';
+			return $rec;
+		}
+		if (!($rec['imap_host'] = self::get_field_value($iid, 'imap_host'))) {
 			$rec['err'] = 'imap.host.miss';
+			return $rec;
+		}
 		$rec['imap_auth'] = self::get_field_value($iid, 'imap_auth');
 		$rec['imap_port'] = self::get_field_value($iid, 'imap_port');
-		if (!($rec['imap_user'] = self::get_field_value($iid, 'imap_user')))
-			$rec['err'] = 'imap.user.miss';
-		if (!($rec['imap_pwd'] = self::get_field_value($iid, 'imap_pwd', true, true)))
-			$rec['err'] = 'imap.pwd.miss';
 		if (!($rec['imap_delim'] = self::get_field_value($iid, 'imap_delim')))
+		{
 			$rec['err'] = 'imap.delim.miss';
+			return $rec;
+		}
 
 		// check for overrides
 		if ($rec['imap_host'] && substr($rec['imap_host'], 3, 3) == '://')
@@ -911,13 +926,28 @@ class identity_switch_prefs extends rcube_plugin
 			$rec['err'] = 'imap.port.num';
 		elseif (($rec['imap_port'] < 1 || $rec['imap_port'] > 65535))
 			$rec['err'] = 'imap.port.range';
+		if (isset($rec['err']))
+			return $rec;
 		if ($rec['imap_auth'] == 'ssl')
 			$rec['flags'] |= self::IMAP_SSL;
 		elseif ($rec['imap_auth'] == 'tls')
 			$rec['flags'] |= self::IMAP_TLS;
 
+		if (!($rec['smtp_user'] = self::get_field_value($iid, 'smtp_user')))
+		{
+			$rec['err'] = 'smtp.user.miss';
+			return $rec;
+		}
+		if (!($rec['smtp_pwd'] = self::get_field_value($iid, 'smtp_pwd', true, true)))
+		{
+			$rec['err'] = 'smtp.pwd.miss';
+			return $rec;
+		}
 		if (!($rec['smtp_host'] = self::get_field_value($iid, 'smtp_host')))
+		{
 			$rec['err'] = 'smtp.host.miss';
+			return $rec;
+		}
 		$rec['smtp_auth'] = self::get_field_value($iid, 'smtp_auth');
 		$rec['smtp_port'] = self::get_field_value($iid, 'smtp_port');
 
@@ -938,12 +968,14 @@ class identity_switch_prefs extends rcube_plugin
 			$rec['err'] = 'smtp.port.num';
 		elseif ($rec['smtp_port'] < 1 || $rec['smtp_port'] > 65535)
 			$rec['err'] = 'smpt.port.range';
+		if (isset($rec['err']))
+			return $rec;
 		if ($rec['smtp_auth'] == 'ssl')
 			$rec['flags'] |= self::SMTP_SSL;
 		elseif ($rec['smtp_auth'] == 'tls')
 			$rec['flags'] |= self::SMTP_TLS;
 
-		// Check notification options
+		// check notification optif
 		if (self::get_field_value($iid, 'check_all_folder'))
 			$rec['flags'] |= self::CHECK_ALLFOLDER;
 		if (self::get_field_value($iid, 'notify_basic'))
@@ -1208,6 +1240,8 @@ class identity_switch_prefs extends rcube_plugin
 			'imap_host'			=> 'localhost',							// IMAP host
 			'imap_delim'		=> '.',									// folder delimiter
 			'imap_port'			=> 143,									// IMAP port
+ 			'smtp_user'			=> '',									// SMTP user
+			'smtp_pwd'			=> '',									// SMTP password
 			'smtp_host'			=> 'localhost', 						// SMTP host
 			'smtp_port'			=> 25,									// SMTP port
 			'notify_timeout'	=> 10,									// notification timeout (defaults to 10 sec.)
@@ -1222,7 +1256,8 @@ class identity_switch_prefs extends rcube_plugin
 		foreach ($rc as $k => $v)
 			self::set($sect, $k, $v);
 
-		return $rc;
+		// #65
+		return self::get($sect, $var);
 	}
 
 	/**

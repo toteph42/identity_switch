@@ -39,15 +39,20 @@ function identity_switch_enabled() {
 	
 	fld.prop('value', val);
 	$('input[name="_label"]').attr('disabled', dis);
+	
+	$('input[name="_imap_user"]').attr('disabled', dis);
+	$('input[name="_imap_pwd"]').attr('disabled', dis);
 	$('input[name="_imap_host"]').attr('disabled', dis);
 	$('input[name="_imap_port"]').attr('disabled', dis);
 	$('select[name="_imap_auth"]').attr('disabled', dis);
-	$('input[name="_imap_user"]').attr('disabled', dis);
-	$('input[name="_imap_pwd"]').attr('disabled', dis);
 	$('input[name="_imap_delim"]').attr('disabled', dis);
+	
+	$('input[name="_smtp_user"]').attr('disabled', dis);
+	$('input[name="_smtp_pwd"]').attr('disabled', dis);
 	$('input[name="_smtp_host"]').attr('disabled', dis);
 	$('input[name="_smtp_port"]').attr('disabled', dis);
 	$('select[name="_smtp_auth"]').attr('disabled', dis);
+	
 	$('input[name="_check_all_folder"]').attr('disabled', dis);
 	$('input[name="_notify_basic"]').attr('disabled', dis);
 	$('input[name="_notify_desktop"]').attr('disabled', dis);
@@ -55,7 +60,7 @@ function identity_switch_enabled() {
 	$('input[name="_notify_sound"]').attr('disabled', dis);
 	$('select[name="_refresh_interval"]').attr('disabled', dis);
 	
-	// Disable all links
+	// disable all links
 	$('a[name^="_notify"]').each(function(i, obj) {
 		if (dis) {
 	  		obj.setAttribute('save', obj.getAttribute('onclick'));

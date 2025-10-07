@@ -6,7 +6,5 @@
 --
 -- Created with: https://sqliteonline.com/
 
-DROP TABLE IF EXISTS `identity_switch`;
-ALTER TABLE
-	`identy_switch` RENAME TO `identity_switch`;
-	
+DROP TABLE IF EXISTS identity_switch;
+ALTER TABLE identy_switch RENAME TO identity_switch;

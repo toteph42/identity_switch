@@ -6,5 +6,9 @@
 --
 -- Created with: https://sqliteonline.com/
 
-DROP TABLE IF EXISTS identity_switch;
-ALTER TABLE identy_switch RENAME TO identity_switch;
+ALTER TABLE identity_switch
+    RENAME COLUMN imap_pwd TO imap_pwd,
+    ADD smtp_user TEXT,
+    ADD smtp_pwd TEXT;
+
+UPDATE identity_switch SET smtp_user = imap_user, smtp_pwd = imap_pwd;

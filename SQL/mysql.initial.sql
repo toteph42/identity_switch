@@ -5,6 +5,7 @@
 -- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
 --
 --  Created with phpmyadmin
+--  Optimized with: https://sqli.to/
 
 CREATE TABLE IF NOT EXISTS `identity_switch`(
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

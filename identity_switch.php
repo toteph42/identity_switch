@@ -34,6 +34,8 @@ declare(strict_types=1);
  * 		imap_host		IMAP host
  * 		imap_delim		golder delimiter
  * 		imap_port		IMAP port
+ * 		smtp_user		SMTP user
+ * 		smtp_pwd		SMTP password
  * 		smtp_host		SMTP host
  * 		smtp_port		SMTP port
  * 		notify_timeout	notification timeout
@@ -63,7 +65,6 @@ class identity_switch extends identity_switch_prefs
 		// identity switch hooks and actions
 		$this->add_hook('startup', 						  [ $this, 'on_startup' ]);
 		$this->add_hook('render_page', 					  [ $this, 'on_render_page' ]);
-		$this->add_hook('smtp_connect', 				  [ $this, 'on_smtp_connect' ]);
 		$this->add_hook('template_object_composeheaders', [ $this, 'on_object_composeheaders' ]);
 		$this->register_action('identity_switch_do',  	  [ $this, 'identity_switch_do_switch' ]);
 
@@ -356,28 +357,6 @@ class identity_switch extends identity_switch_prefs
 				'_mbox' => 'INBOX',
 			]
 		);
-	}
-
-	/**
-	 * 	Send mail
-	 *
-	 * 	@param array $args
-	 * 	@return array
-	 */
-	function on_smtp_connect(array $args): array
-	{
-		$rc = rcmail::get_instance();
-
-		$rec = self::get(self::get('iid'));
-
-		$args['smtp_user'] = $rec['imap_user'];
-        $args['smtp_pass'] = $rec['imap_pwd'] && ($rec['flags'] & (self::SMTP_SSL|self::SMTP_TLS)) ?
-        					 $rc->decrypt($rec['imap_pwd']) : '';
-		$args['smtp_host'] = $rec['smtp_host'].':'.$rec['smtp_port'];
-		if ($rec['flags'] & (self::SMTP_SSL|self::SMTP_TLS))
-			$args['smtp_host'] = ($rec['flags'] & self::SMTP_SSL ? 'ssl' : 'tls').'://'.$args['smtp_host'];
-
-		return $args;
 	}
 
 	/**

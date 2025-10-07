@@ -30,21 +30,26 @@ $config['identity_switch.config'] = [
 		// Defaults to 'not specified'
 		'delimiter' => '.',
 
-		// Login name, can be 'email' (full address from identity), 'mbox' (only mailbox part).
+		// Login name for IMAP, can be 'email' (full address from identity), 'mbox' (only mailbox part).
 		// Any other value is treated as 'not specified' (default).
-		'user' => 'email',
+		'imap_user' => 'email',
 
 		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
 		// Must always start with scheme.
 		// If you use '*' as wild card, the domain and tld of the identity is used 
 		// Defaults to 'not specified'
 		'smtp' => 'imap://smtp.domain.tld:130',
+
+		// Login name for SMTP, can be 'email' (full address from identity), 'mbox' (only mailbox part).
+		// Any other value is treated as 'not specified' (default).
+		'smtp_user' => 'email',
 	],
 
 	// 'another.tld' => [
 	//		'imap' 		=> 'tls://imap.another.tld',
 	//		'smtp' 		=> 'tls://smtp.another.tld',
-	//		'user' 		=> 'mbox',
+	//		'imap_user'	=> 'mbox',
+	//		'smtp_user'	=> 'email',
 	// ],
 
 	// Catch all (if you specify multiple 'catch all', then only first one is used)
