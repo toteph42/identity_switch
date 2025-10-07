@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.3
+
+* Fixing data base schemes
+
 ## Release 2.0.2
 
 * Fixing data base schemes
