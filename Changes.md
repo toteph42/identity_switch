@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.4
+
+* Recover on_smtp_conect() function
+
 ## Release 2.0.3
 
 * Fixing data base schemes
