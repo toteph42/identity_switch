@@ -169,6 +169,8 @@ class identity_switch extends identity_switch_prefs
 			self::set($iid, 'imap_delim', $_SESSION['imap_delimiter']);
 
 			// swap SMTP data
+			self::set($iid, 'smtp_user', $_SESSION['username']);
+			self::set($iid, 'smtp_pwd', $_SESSION['password']);
 			$hosts = $rc->config->get('smtp_host');
 			if (!is_array ($hosts))
 				$hosts = [ $_SESSION['storage_host'] => $hosts ];

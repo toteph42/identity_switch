@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.5
+
+* Error in handling of default user credentials
+
 ## Release 2.0.4
 
 * Recover on_smtp_conect() function
