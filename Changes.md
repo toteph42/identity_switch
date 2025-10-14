@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.6
+
+* Error in PostGres databse update instructions
+
 ## Release 2.0.5
 
 * Error in handling of default user credentials

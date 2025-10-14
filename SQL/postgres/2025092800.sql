@@ -6,7 +6,7 @@
 --
 -- Created with: https://sqliteonline.com/
 
-LTER TABLE identity_switch
+ALTER TABLE identity_switch
 ADD COLUMN smtp_user TEXT,
 ADD COLUMN smtp_pwd TEXT;
 
