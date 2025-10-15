@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.7
+
+* Error in MySQL databse initial instructions
+
 ## Release 2.0.6
 
 * Error in PostGres databse update instructions

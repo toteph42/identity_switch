@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS `identity_switch`(
     `imap_delim` CHAR(1),
     `newmail_check` SMALLINT DEFAULT 300,
     `notify_timeout` SMALLINT DEFAULT 10,
+    `smtp_user` VARCHAR(64),
+    `smtp_pwd` VARCHAR(128),
     `smtp_host` VARCHAR(64),
     `smtp_port` SMALLINT DEFAULT NULL,
     `drafts` VARCHAR(64) DEFAULT '',
