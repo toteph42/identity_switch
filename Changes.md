@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 2.0.8
+
+* Typo in rEADME.md
+* Added contribution from Andrei Apostu
+
 ## Release 2.0.7
 
 * Error in MySQL databse initial instructions

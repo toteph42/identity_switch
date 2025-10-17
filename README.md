@@ -84,7 +84,7 @@ Please don't forget to set `Special Folders` in `Settings` -> `Preferences`. All
 
 ### Version compatibility ###
 
-* Versions 1.x - for Roundcube v1.6. Requires PHP version >= 8.0.0.
+* Versions 1.x / 2.x - for Roundcube v1.6.x requires PHP version >= 8.0.0.
 
 ### Limitations ###
 
@@ -93,11 +93,6 @@ This plugin only supports `Classic`, `Elatic`, `Larry` and `Hivemail` skin. If y
 ### Migration from ident_switch plugin ###
 
 If you've installed the `ident_switch` plugin, there is a migration file available in `SQL` subdirectory which copies the content of the old table to the new table and deletes the `ident_switch` table. To make this happen, you should first install this plugin (during installation a table `identity_switch` will automatically be created) and then you should appy `SQL/migrate.sql`. 
-
-### Upgrade ###
-
-If you want to upgrade to this plugin, please be aware, the name of the data base table has changed. In subdirectoy `SQL` ther
-are scrpst avaibale to ugrade your installation. These scriüps must called manually (look for `20241122.sql`). This script must be called after installation of `identity_switch` plugin, but before removing `identy_switch` plugin.
 
 ### License ###
 
