@@ -1153,7 +1153,7 @@ class identity_switch_prefs extends rcube_plugin
 	 * 	@param string|int|bool $val
 	 * 	@param string|int|bool $default
 	 */
-	protected function set(string|int $sect, array|string|int $var, mixed $val = null, string|int|bool $default = null): void
+	protected function set(string|int $sect, array|string|int $var, ?mixed $val = null, string|int|bool|null $default = null): void
 	{
 		// table defied?
 		if (!isset($_SESSION[self::TABLE]))
@@ -1182,7 +1182,7 @@ class identity_switch_prefs extends rcube_plugin
 	 * 	@param  string|int $var
 	 * 	@return string|int|bool|array
 	 */
-	protected function get(string|int $sect = null, string|int $var = null): mixed
+	protected function get(string|int|null $sect = null, string|int|null $var = null): mixed
 	{
 		// get whole table?
 		if (!$sect && !$var)
@@ -1266,7 +1266,7 @@ class identity_switch_prefs extends rcube_plugin
 	 * 	@param string|int $sect
 	 * 	@param string $var
 	 */
-	protected function del(string|int $sect = null, string $var = null): void
+	protected function del(string|int|null $sect = null, ?string $var = null): void
 	{
 		if (!$sect && !$var)
 			$_SESSION[self::TABLE] = [];

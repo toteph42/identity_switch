@@ -1,8 +1,12 @@
 # Changelog identity switch plugin
 
+## Release 2.0.9
+
+* Depreciated messages removed
+
 ## Release 2.0.8
 
-* Typo in rEADME.md
+* Typo in README.md
 * Added contribution from Andrei Apostu
 
 ## Release 2.0.7
