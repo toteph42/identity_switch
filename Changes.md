@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.10
+
+* Fixed copatibility errors with PHP 8.4.x
+
 ## Release 2.0.9
 
 * Depreciated messages removed

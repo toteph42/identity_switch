@@ -537,7 +537,7 @@ class identity_switch_prefs extends rcube_plugin
 				// set up user name
 				foreach ( [ 'imap_user', 'smtp_user'] as $usr)
 				{
-					if ($cfg[$usr])
+					if (isset($cfg[$usr]))
 					{
 						switch (strtoupper($cfg[$usr]))
 						{
@@ -1153,7 +1153,7 @@ class identity_switch_prefs extends rcube_plugin
 	 * 	@param string|int|bool $val
 	 * 	@param string|int|bool $default
 	 */
-	protected function set(string|int $sect, array|string|int $var, ?mixed $val = null, string|int|bool|null $default = null): void
+	protected function set(string|int $sect, array|string|int $var, mixed $val = null, string|int|bool|null $default = null): void
 	{
 		// table defied?
 		if (!isset($_SESSION[self::TABLE]))
