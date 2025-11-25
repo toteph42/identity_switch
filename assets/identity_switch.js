@@ -132,7 +132,7 @@ function identity_switch_addCbElastic($sw) {
 // Change userid in composer window to select proper identity
 function identity_switch_fixIdent(iid) {
 	if (parseInt(iid) > 0)
-		$("#_from").val(iid);
+		$("#_from").val(iid).change();
 }
 
 // Open/close menu
