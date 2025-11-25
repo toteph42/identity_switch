@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.12
+
+* Removed Fixed issue #70
+
 ## Release 2.0.11
 
 * Fixed issue #70
