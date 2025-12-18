@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.13
+
+* Added switch for small dropdown
+
 ## Release 2.0.12
 
 * Removed Fixed issue #70

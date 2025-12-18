@@ -302,6 +302,9 @@ class identity_switch extends identity_switch_prefs
 		// sort identities
 		ksort($acc);
 
+		// get dropdown line size
+		$size = $this->get('config', 'dropdown_size');
+
 		// render UI if user has extra accounts
 		if (count($acc) > 1)
 		{
@@ -310,10 +313,11 @@ class identity_switch extends identity_switch_prefs
 				   'class="form-control" '.
 				   'onclick="identity_switch_toggle_menu()">'.
 				   rcube::Q(self::get($iid, 'label')).
-				   '<div id="identity_switch_dropdown"><ul>';
+				   '<div id="identity_switch_dropdown" style="line-height:'.$size.'px"><ul>';
 			foreach ($acc as $name => $rec)
 				$div .= '<li onclick="identity_switch_run('.$rec['iid'].');"><a href="#">'.$name.
-				  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen">'.
+				  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen" '.
+				  	   	'style="top:'.($size >= 24 ? ((34 - $size)/2).'px' : '0px;line-height:initial').'">'.
 				  	   	($rec['iid'] == $iid ? "" : ($rec['unseen'] > 0 ? $rec['unseen'] : '')).'</span></a></li>';
 
 			self::set($iid, 'unseen', 0);

@@ -553,6 +553,7 @@ class identity_switch_prefs extends rcube_plugin
 						}
 					}
 				}
+
 				// check for wild card
 				if (strpos($cfg['imap'], '*'))
 					$cfg['imap'] = str_replace('*', substr($email, strpos($email, '@') + 1), $cfg['imap']);
@@ -1125,7 +1126,7 @@ class identity_switch_prefs extends rcube_plugin
 		if (!($p = strstr($email, '@')) || !($dom = substr($p, 1)))
 			return false;
 
-		// load config.inc.php.dist
+		// load config.inc.php or config.inc.php.dist
 		$this->load_config();
 
 		$cfg = rcmail::get_instance()->config->get('identity_switch.config', []);
@@ -1218,6 +1219,8 @@ class identity_switch_prefs extends rcube_plugin
 					self::set('config', $k, (int)$v, 10);
 				if ($k == 'wait')
 					self::set('config', $k, (int)$v, 60);
+				if ($k == 'dropdown_size')
+					self::set('config', $k, (int)$v, 34);
 			}
 			self::set('iid', 0);
 			self::set('config', 'language', $_SESSION['language']);
@@ -1256,7 +1259,7 @@ class identity_switch_prefs extends rcube_plugin
 		foreach ($rc as $k => $v)
 			self::set($sect, $k, $v);
 
-		// #65
+		// Issue #65
 		return self::get($sect, $var);
 	}
 

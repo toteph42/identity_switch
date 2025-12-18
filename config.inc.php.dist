@@ -11,10 +11,10 @@ $config['identity_switch.config'] = [
 	// Preconfigured settings for different mail domains.
  	// Appropriate set of values is searched by mapping domain of email (from identity) to array key.
  	
- 	// Please note:
- 	// - Using config.inc.php is only done, when you enter identity_switch configuration panel!
- 	// - On Startup of RoundCube all configuration parameters were loaded from data base, so changes to this
- 	//   configuration file does not apply.
+ 	// Please note: On Startup of RoundCube all configuration parameters were loaded from data base, 
+ 	// so changes to this configuration file does not apply on existing entries.
+ 	
+ 	// If you want to use your own configuration, copy this file to config.inc.php
 	
 	// Domain part of email address
 	// If you use '*' as wild card, the domain and tld of the identity is used 
@@ -61,26 +61,30 @@ $config['identity_switch.config'] = [
 	//	],
 
 	// Allow logging to 'logs/identity_switch.log'. Default is false.
-	'logging'	=> false,
+	'logging'		=> false,
 
 	// Allow new mail checking. Default is true.
-	'check' 	=> true,
-
+	'check' 		=> true,
+	
 	// Specify interval for checking of new mails. Default is 5 min. (5 * 60 sec.)
-	'interval' 	=> 300, 
+	'interval' 		=> 300, 
 
 	// Specify number of microseconds between each new mail check. Default is 0 micoseconds.
 	// If value is greater than 1000000 (1 second) delay time is rounded to seconds.
-	'delay' 	=> 0,
+	'delay' 		=> 0,
 
 	// Specify no. of retries for reading data from mail server. Default is 10 times.
-	'retries' 	=> 10, 
+	'retries' 		=> 10, 
 	
 	// Max. number of seconds to wait for response from identity_switch_newmails.php
 	// Defaults to 60 seconds
-	'wait' 		=> 60,
+	'wait' 			=> 60,
+	
+	// Dropdown selection line size
+	// Defaults to 34px
+	'dropdown_size'	=> 34,
 
 	// Enable some debugging messges saved in log file. Default is false
-	'debug' 	=> false,
+	'debug' 		=> false,
 ];
 

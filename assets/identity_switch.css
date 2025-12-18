@@ -71,6 +71,7 @@
 	white-space: nowrap;
 	color: #2c363a;
 	background: none;
+	height: min-content;
 }
 	
 #identity_switch_dropdown li:hover {
@@ -83,17 +84,16 @@
 
 #identity_switch_dropdown .unseen {
 	position: absolute;
-  	top: 0;
+  	top: 5px;
   	right: 0;
   	min-width: 2em;
-  	line-height: 1.4rem;
-  	margin: 7.7px 0px 7.7px 0px;
+  	font-weight: 700;
   	padding: 0 .3em;
   	border-radius: .4em;
   	background: #37beff;
   	color: #fff;
   	text-align: center;
-  	font-weight: 700;
+  	line-height: 24px;
 }
 
 html.dark-mode #identity_switch_menu {

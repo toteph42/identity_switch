@@ -7,7 +7,8 @@
 
 $(function() {
 	$sw = $('#identity_switch_menu');
-	// #38
+	
+	// Issue #38
 	if ($sw.length == 0)
 		return;
 	
@@ -31,7 +32,7 @@ $(function() {
 	}
 
 	if (isOk)
-        $sw.show();
+		$sw.show();
 });
 
 // Catch all mouse clicks
@@ -65,8 +66,11 @@ function identity_switch_addCbLarry($sw) {
 			$sw.prependTo('#taskbar');
 			$truName.hide();
 			// Move our selection menu a bit to the right
-			$('#identity_switch_menu').css('padding-top', '4px').css('padding-bottom', '4px');
-			$('#identity_switch_dropdown').css('margin-left', '-92px');
+			$('#identity_switch_menu')
+				.css('padding-top', '4px')
+				.css('padding-bottom', '4px');
+			$('#identity_switch_dropdown')
+				.css('margin-left', '-92px');
 
 			return true;
 		}
