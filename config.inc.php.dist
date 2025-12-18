@@ -80,8 +80,7 @@ $config['identity_switch.config'] = [
 	// Defaults to 60 seconds
 	'wait' 			=> 60,
 	
-	// Dropdown selection line size
-	// Defaults to 34px
+	// Dropdown selection line size. Defaults to 34px
 	'dropdown_size'	=> 34,
 
 	// Enable some debugging messges saved in log file. Default is false

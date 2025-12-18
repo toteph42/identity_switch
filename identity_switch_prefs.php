@@ -1253,6 +1253,7 @@ class identity_switch_prefs extends rcube_plugin
 			'unseen'			=> 0,									// # of unseen messages
 			'checked_last'		=> 0,									// last time checked
 			'notify'			=> false,								// notify user flag
+			'dropdown_size'		=> 34,									// dropdown section line size
 		];
 
 		// save defaults
