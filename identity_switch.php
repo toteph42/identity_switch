@@ -290,6 +290,7 @@ class identity_switch extends identity_switch_prefs
 	 */
 	protected function create_menu(): void
 	{
+
 		// build identity table
 		$acc = [];
 		foreach (self::get() as $iid => $rec)
@@ -302,22 +303,34 @@ class identity_switch extends identity_switch_prefs
 		// sort identities
 		ksort($acc);
 
+		// find position of iid
+
+		$iid = self::get('iid');
+		$off = 0;
+		foreach ($acc as  $a)
+		{
+			// identity found?
+			if ($a['iid'] == $iid)
+				break;
+			$off++;
+		}
+
 		// get dropdown line size
 		$size = $this->get('config', 'dropdown_size');
 
 		// render UI if user has extra accounts
 		if (count($acc) > 1)
 		{
-			$iid = self::get('iid');
 			$div = '<div id="identity_switch_menu" '.
 				   'class="form-control" '.
-				   'onclick="identity_switch_toggle_menu()">'.
+				   'onclick="identity_switch_toggle_menu('.$off * $size.')">'.
 				   rcube::Q(self::get($iid, 'label')).
 				   '<div id="identity_switch_dropdown" style="line-height:'.$size.'px"><ul>';
 			foreach ($acc as $name => $rec)
 				$div .= '<li onclick="identity_switch_run('.$rec['iid'].');"><a href="#">'.$name.
 				  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen" '.
-				  	   	'style="top:'.($size >= 24 ? ((34 - $size)/2).'px' : '0px;line-height:initial').'">'.
+				  	   	'style="top:'.($size >= 24 ? ((34 - $size)/2).'px' :
+				  	   	'0px;line-height:initial;font-size:x-small').'">'.
 				  	   	($rec['iid'] == $iid ? "" : ($rec['unseen'] > 0 ? $rec['unseen'] : '')).'</span></a></li>';
 
 			self::set($iid, 'unseen', 0);

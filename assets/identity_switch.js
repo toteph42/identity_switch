@@ -140,7 +140,7 @@ function identity_switch_fixIdent(iid) {
 }
 
 // Open/close menu
-function identity_switch_toggle_menu() {
+function identity_switch_toggle_menu(off) {
 	var d = $('#identity_switch_dropdown'); 
 
 	if (d.is(':hidden')) {
@@ -148,6 +148,9 @@ function identity_switch_toggle_menu() {
 		d.load(location.href + ' #identity_switch_dropdown > *', '');
 		d.show();
 		$('#messagelist-fixedcopy').css('z-index', 'auto');
+		
+		// scroll to iid
+		d.scrollTop(off);
 	} else
 		d.hide();
 }

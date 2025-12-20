@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 2.0.15
+
+* Added font-size für small dropdown
+* Set position in dropdown selection list
+
 ## Release 2.0.14
 
 * Bug fix
