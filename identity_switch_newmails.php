@@ -10,11 +10,10 @@ declare(strict_types=1);
 
 // include environment
 if (!defined('INSTALL_PATH'))
-	define('INSTALL_PATH', strpos($_SERVER['DOCUMENT_ROOT'], 'public_html') ?
-		   realpath(__DIR__.'/../..').'/' : $_SERVER['DOCUMENT_ROOT'].'/');
-require_once INSTALL_PATH.'program/include/iniset.php';
-require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_rpc.php';
-require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
+	define('INSTALL_PATH', realpath($_SERVER['DOCUMENT_ROOT'].'/../').'/');
+require_once \INSTALL_PATH.'program/include/iniset.php';
+require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_rpc.php';
+require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
 
 class identity_switch_newmails extends identity_switch_rpc {
 
@@ -29,28 +28,30 @@ class identity_switch_newmails extends identity_switch_rpc {
     {
 		$rc = rcmail::get_instance();
 
+		identity_switch_prefs::write_log(__FILE__, __LINE__, 'Starting', true);
+
 		// get Identity id
 		if (is_null($iid = rcube_utils::get_input_value('iid', rcube_utils::INPUT_GET)))
 		{
-			identity_switch_prefs::write_log('Cannot load identity id - stop checking', true);
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cannot load identity id - stop checking', true);
 			return;
 		}
 
 		// get cache file name
 		if (is_null($this->file = rcube_utils::get_input_value('cache', rcube_utils::INPUT_GET)))
 		{
-			identity_switch_prefs::write_log('Cannot get cache file name - stop checking');
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cannot get cache file name - stop checking');
 			return;
 		} else
-			identity_switch_prefs::write_log('Cache file name "'.$this->file.'"', true);
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cache file name "'.$this->file.'"', true);
 
 		// get cached data
 		if (!file_exists($this->file))
 		{
-			identity_switch_prefs::write_log('Cache file "'.$this->file.'" does not exists - stop checking');
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cache file "'.$this->file.'" does not exists - stop checking');
 			return;
 		} else
-			identity_switch_prefs::write_log('Cache file loaded', true);
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cache file loaded', true);
 
 		// storage initialization hook
 		$rc->plugins->register_hook('storage_init', [ $this, 'set_language' ]);
@@ -76,7 +77,7 @@ class identity_switch_newmails extends identity_switch_rpc {
 				if (!$res[$iid]->open($host))
 				{
 					self::write_data($iid.'##'.$res[$iid]);
-					identity_switch_prefs::write_log('Cannot open host "'.$host.'" - stop checking', true);
+					identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cannot open host "'.$host.'" - stop checking', true);
 					return;
 				}
 
@@ -96,12 +97,12 @@ class identity_switch_newmails extends identity_switch_rpc {
 				{
 					if ($this->cache['config']['delay'] > 1000000)
 					{
-						identity_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" seconds', true);
+						identity_switch_prefs::write_log(__FILE__, __LINE__, 'Delay execution by "'.$this->cache['config']['delay'].'" seconds', true);
 						sleep ($this->cache['config']['delay'] / 1000000);
 					}
 					else
 					{
-						identity_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" microseconds', true);
+						identity_switch_prefs::write_log(__FILE__, __LINE__, 'Delay execution by "'.$this->cache['config']['delay'].'" microseconds', true);
 						usleep ($this->cache['config']['delay']);
 					}
 				}
@@ -125,7 +126,7 @@ class identity_switch_newmails extends identity_switch_rpc {
 
 			// delete cache data
 			@unlink($this->file);
-			identity_switch_prefs::write_log('Cache file "'.$this->file.'" deleted', true);
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cache file "'.$this->file.'" deleted', true);
 
 			return;
 		} else {
@@ -174,7 +175,7 @@ class identity_switch_newmails extends identity_switch_rpc {
 	       	$storage->close();
 
 	       	self::write_data($iid.'##'.$unseen);
-			identity_switch_prefs::write_log('Setting unseen count to '.$unseen.' for identity id '.$iid, true);
+			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Setting unseen count to '.$unseen.' for identity id '.$iid, true);
 
 	       	return;
 		}
@@ -209,7 +210,7 @@ class identity_switch_newmails extends identity_switch_rpc {
 			// open output file
 			if (!($this->fp = @fopen($this->cache['config']['data'], 'a')))
 			{
-				identity_switch_prefs::write_log('Error opening data file "'.$this->cache['config']['data'].'"');
+				identity_switch_prefs::write_log(__FILE__, __LINE__, 'Error opening data file "'.$this->cache['config']['data'].'"');
 				return false;
 			}
 			return fwrite($this->fp, time().'##'.$msg.'###') !== false ? true : false;

@@ -33,7 +33,7 @@ class identity_switch_rpc  {
 		]);
 
 		// open async connection
-		if (!($this->fp = stream_socket_client($host, $errno, $errmsg, 30,STREAM_CLIENT_ASYNC_CONNECT, $ctx)))
+		if (!($this->fp = stream_socket_client($host, $errno, $errmsg, 30, STREAM_CLIENT_ASYNC_CONNECT, $ctx)))
 			return 'Cannot connect to "'.$host.'" - ['.$errno.'] '.$errmsg;
 
 		// set timeout

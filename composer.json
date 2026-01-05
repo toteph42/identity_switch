@@ -26,7 +26,7 @@
 		}
 	],
 	"require" : {
-		"php" : ">=8.0.0",
+		"php" : ">=8.1",
 		"roundcube/plugin-installer" : ">=0.1.3",
 		"ext-ctype" : "*"
 	},
@@ -43,9 +43,9 @@
 			"sql-dir" : "SQL"
 		}
 	},
-	"config": {
-		"allow-plugins": {
-			"roundcube/plugin-installer": true
+	"config" : {
+		"allow-plugins" : {
+			"roundcube/plugin-installer" : true
 		}
 	}
 }

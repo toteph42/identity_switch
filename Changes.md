@@ -1,5 +1,13 @@
 # Changelog identity switch plugin
 
+## Release 2.0.16
+
+* Moved 'interval' parameter to domain configuration
+* Fixed minor bug in configuration handling
+* Logging modified to get a better insigth in processing
+* Support for RoundCube 1.7
+* Automatic creation of symlink in public_html directory to enable call of php scripts
+
 ## Release 2.0.15
 
 * Added font-size für small dropdown

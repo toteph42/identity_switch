@@ -47,8 +47,11 @@ declare(strict_types=1);
  *
  */
 
-require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
-require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_newmails.php';
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
+
+require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
+require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_newmails.php';
 
 class identity_switch extends identity_switch_prefs
 {
@@ -88,6 +91,25 @@ class identity_switch extends identity_switch_prefs
 			$this->add_hook('storage_connect', [ $this, 'override_ldap_password' ]);
 
 		$this->include_stylesheet('assets/identity_switch.css');
+
+		// check for symlink in public_html for RoundCube >= 1.6
+		$link = 'plugins/identity_switch';
+	    $fs = new Filesystem();
+		if (!$fs->exists($link)) {
+
+			if (!$fs->exists(\INSTALL_PATH.'public_html/'.$link)) {
+
+	    		$path = \INSTALL_PATH.'plugins/identity_switch';
+
+	    		// check for Windows OS
+				if ('\\' === \DIRECTORY_SEPARATOR)
+	    			$fs->symlink($path, $link);
+		    	else
+		    		$fs->symlink(Path::makeRelative($path, Path::getDirectory($link)), $link);
+
+		    	self::write_log(__FILE__, __LINE__, 'Creating symlink "'.$link.'" to "'.$path.'"', true);
+	    	}
+	    }
 	}
 
 	/**
@@ -185,8 +207,8 @@ class identity_switch extends identity_switch_prefs
 			}
 			if (!$host)
 			{
-				self::write_log('Cannot discover associated SMTP host to IMAP server "'.$_SESSION['storage_host'].'" '.
-								 '- substituting with "localhost"');
+				self::write_log(__FILE__, __LINE__, 'Cannot discover associated SMTP host to IMAP server "'.
+								$_SESSION['storage_host'].'" - substituting with "localhost"');
 				$host = 'localhost';
 			}
 
@@ -369,7 +391,7 @@ class identity_switch extends identity_switch_prefs
 
 		self::set('lock', 0);
 
-		$this->write_log('Switching to identity "'.$rec['imap_user'].'"');
+		$this->write_log(__FILE__, __LINE__, 'Switching to identity "'.$rec['imap_user'].'"');
 
 		$rc->output->redirect(
 			[
@@ -438,7 +460,7 @@ class identity_switch extends identity_switch_prefs
         {
         	if($r['imap_pwd'])
             {
-            	$this->write_log('Override IMAP password for user "' .$args['user'].'"');
+            	$this->write_log(__FILE__, __LINE__, 'Override IMAP password for user "' .$args['user'].'"');
                 // replace 'password' with the password you want to use
                 $args['pass'] = $rc->decrypt($r['imap_pwd']);
             }
@@ -482,7 +504,7 @@ class identity_switch extends identity_switch_prefs
 		// new mail check disabled?
 		if (!self::get('config', 'check'))
 		{
-			self::write_log('New mail check disabled - stop checking', true);
+			self::write_log(__FILE__, __LINE__, 'New mail check disabled - stop checking', true);
 			return $args;
 		}
 
@@ -490,8 +512,8 @@ class identity_switch extends identity_switch_prefs
 		if (!isset($args['action']) || ($args['action'] != 'refresh' && $args['action'] != 'getunread'))
 			return $args;
 
-		self::write_log('Starting new mail check with arguments "'.serialize($args).'"."', true);
-		self::write_log('Configuration loaded "'.serialize($cfg).'".', true);
+		self::write_log(__FILE__, __LINE__, 'Starting new mail check with arguments "'.serialize($args).'"."', true);
+		self::write_log(__FILE__, __LINE__, 'Configuration loaded "'.serialize($cfg).'".', true);
 
 		// make a copy of our cached data
 		$cache = self::get();
@@ -503,7 +525,8 @@ class identity_switch extends identity_switch_prefs
 			if (!is_integer($iid))
 				continue;
 
-			if ((int)$rec['flags'] & identity_switch_prefs::ENABLED && (int)$rec['checked_last'] + $cfg['interval'] < time())
+			if ((int)$rec['flags'] & identity_switch_prefs::ENABLED &&
+				(int)$rec['checked_last'] + (int)$rec['newmail_check'] < time())
 				$chk++;
 			else
 				unset($cache[$iid]);
@@ -512,12 +535,12 @@ class identity_switch extends identity_switch_prefs
 		if (!$chk)
 		{
 			if (!$chk)
-				self::write_log('No accounts to check - stop checking', true);
+				self::write_log(__FILE__, __LINE__, 'No accounts to check - stop checking', true);
 
 			return $args;
 		}
 
-		self::write_log('Check allowed for '.$chk.' account(s)', true);
+		self::write_log(__FILE__, __LINE__, 'Check allowed for '.$chk.' account(s)', true);
 
 		if ($chk && !file_exists($cfg['cache']))
 		{
@@ -528,16 +551,16 @@ class identity_switch extends identity_switch_prefs
 			    self::set('config', 'fp', $cfg['fp'] = new identity_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log('Cannot open connection - '.$cfg['fp'].' for '.$host.' - stop checking');
+					$this->write_log(__FILE__, __LINE__, 'Cannot open connection - '.$cfg['fp'].' for '.$host.' - stop checking');
 					return $args;
 				}
-				self::write_log('Host "'.$host.'" connected', true);
+				self::write_log(__FILE__, __LINE__, 'Host "'.$host.'" connected', true);
 			}
 
 			// save data for background sharing
 			file_put_contents($cfg['cache'], serialize($cache));
 
-			self::write_log('Cache file "'.$cfg['cache'].'" created');
+			self::write_log(__FILE__, __LINE__, 'Cache file "'.$cfg['cache'].'" created');
 
     		// prepare request (no fopen() usage because "allow_url_fopen=FALSE" may be set in PHP.INI)
 			$req = '/plugins/identity_switch/identity_switch_newmails.php?iid=0&cache='.urlencode($cfg['cache']);
@@ -546,26 +569,27 @@ class identity_switch extends identity_switch_prefs
 				if (is_resource($cfg['fp']))
 					fclose($cfg['fp']);
 				self::set('config', 'fp', $cfg['fp'] = 0);
-				$this->write_log('Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
+				$this->write_log(__FILE__, __LINE__, 'Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
 				return $args;
 			}
-			self::write_log('Starting request "'.$req.'"', true);
+			self::write_log(__FILE__, __LINE__, 'Request started "'.$req.'"', true);
 		}
 
 		// check for data file
 		$n = 0;
 		while (!file_exists($cfg['data']))
 		{
-			if ($n++ > self::get('wait'))
+			if ($n++ > self::get('config', 'wait'))
 			{
-				self::write_log('No data file exist - stop checking', true);
+				self::write_log(__FILE__, __LINE__, 'No data file found - stop checking after '.self::get('config', 'wait').
+								' seconds waiting for "'.$cfg['data'].'"', true);
 				return $args;
 			}
 			sleep (1);
 		}
 
 		// load data file
-		self::write_log('Loading and deleting data file', true);
+		self::write_log(__FILE__, __LINE__, 'Loading and deleting data file', true);
 		$wrk = file_get_contents($cfg['data']);
 		@unlink($cfg['data']);
 
@@ -585,7 +609,7 @@ class identity_switch extends identity_switch_prefs
 				// Check for error message
 				if (!$r[1] && isset($r[2]))
 				{
-					$this->write_log('NewMail error: '.$r[2]);
+					$this->write_log(__FILE__, __LINE__, 'NewMail error: '.$r[2]);
 					continue;
 				}
 
@@ -609,7 +633,7 @@ class identity_switch extends identity_switch_prefs
 					self::set($r[1], 'checked_last', $r[0]);
 			}
 
-			self::write_log('Starting notification.', true);
+			self::write_log(__FILE__, __LINE__, 'Starting notification.', true);
 
 			self::do_notify();
 		}

@@ -532,7 +532,7 @@ class identity_switch_prefs extends rcube_plugin
 				// ensure to get default values
 				self::get($iid = $args['record']['identity_id']);
 
-				self::write_log('Applying predefined configuration for "'.$email.'".');
+				self::write_log(__FILE__, __LINE__, 'Applying predefined configuration for "'.$email.'".');
 
 				// set up user name
 				foreach ( [ 'imap_user', 'smtp_user'] as $usr)
@@ -569,7 +569,7 @@ class identity_switch_prefs extends rcube_plugin
 				if (strcasecmp('ssl', $url['scheme']) === 0)
 					self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_SSL);
 				self::set($iid, 'imap_delim', $cfg['delimiter']);
-				self::set($iid, 'newmail_check', (int)$cfg['interval']);
+				self::set($iid, 'newmail_check', $cfg['interval']);
 
 				$url = parse_url($cfg['smtp']);
 				self::set($iid, 'smtp_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
@@ -853,7 +853,7 @@ class identity_switch_prefs extends rcube_plugin
 		$sql = 'DELETE FROM '.$rc->db->table_name(self::TABLE).' WHERE iid = ? AND user_id = ?';
 		$q = $rc->db->query($sql, $args['id'], $rc->user->ID);
 		if ($rc->db->affected_rows($q))
-			$this->write_log('Deleted identity "'.$args['id'].'"');
+			$this->write_log(__FILE__, __LINE__, 'Deleted identity "'.$args['id'].'"');
 
 		self::del($args['id']);
 
@@ -1137,12 +1137,6 @@ class identity_switch_prefs extends rcube_plugin
 		if (!isset($cfg[$dom]) && isset($cfg['*']))
 			$dom = '*';
 
-		$cfg[$dom]['logging'] 	= $cfg['logging'];
-		$cfg[$dom]['check'] 	= $cfg['check'];
-		$cfg[$dom]['interval'] 	= $cfg['interval'];
-		$cfg[$dom]['retries'] 	= $cfg['retries'];
-		$cfg[$dom]['debug'] 	= $cfg['debug'];
-
 		return $cfg[$dom];
 	}
 
@@ -1211,8 +1205,6 @@ class identity_switch_prefs extends rcube_plugin
 					self::set('config', $k, (bool)$v, false);
 				if ($k == 'check')
 					self::set('config', $k, (bool)$v, true);
-				if ($k == 'interval')
-					self::set('config', $k, (int)$v, 30);
 				if ($k == 'delay')
 					self::set('config', $k, (int)$v, 0);
 				if ($k == 'retries')
@@ -1248,12 +1240,11 @@ class identity_switch_prefs extends rcube_plugin
 			'smtp_host'			=> 'localhost', 						// SMTP host
 			'smtp_port'			=> 25,									// SMTP port
 			'notify_timeout'	=> 10,									// notification timeout (defaults to 10 sec.)
-			'newmail_check'		=> self::get('config', 'interval'),		// new mail check interval
+			'newmail_check'		=> 300,									// new mail check interval
 			'folders'			=> [],									// special folder name array
 			'unseen'			=> 0,									// # of unseen messages
 			'checked_last'		=> 0,									// last time checked
 			'notify'			=> false,								// notify user flag
-			'dropdown_size'		=> 34,									// dropdown section line size
 		];
 
 		// save defaults
@@ -1285,15 +1276,17 @@ class identity_switch_prefs extends rcube_plugin
 	 * 	Write log message
 	 *
 	 * 	@param string $txt 		Log message
+	 * 	@param string $file		File name
+	 * 	@param string $line		Line number
 	 * 	@param bool   $debug 	TRUE=Is debug message; FALSE=regular message (default)
 	 */
-	static public function write_log(string $txt, bool $debug = false): void
+	static public function write_log(string $file, int $line, string $txt, bool $debug = false): void
 	{
 		if (!$debug && isset($_SESSION[self::TABLE]['config']) && $_SESSION[self::TABLE]['config']['logging'])
-			rcmail::get_instance()->write_log('identity_switch', $txt);
+			rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
 
 		if ($debug && isset($_SESSION[self::TABLE]['config']) && $_SESSION[self::TABLE]['config']['debug'])
-			rcmail::get_instance()->write_log('identity_switch', $txt);
+			rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
 	}
 
 }
