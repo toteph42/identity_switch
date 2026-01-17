@@ -71,9 +71,21 @@ class identity_switch_newmails extends identity_switch_rpc {
 				if (!is_numeric($iid))
 					continue;
 
-		        $host = ($_SERVER['SERVER_PORT'] != '80' ? 'ssl://' : '').$_SERVER['HTTP_HOST'].
-		        		':'.$_SERVER['SERVER_PORT'];
-		        $res[$iid] = new identity_switch_rpc();
+				// #71 check whether host supports SSL
+				$c = stream_context_create([
+				    'ssl' => [
+				        'verify_peer' => false,
+				        'verify_peer_name' => false,
+				    ]
+				]);
+
+				$r = @file_get_contents($_SERVER['HTTP_HOST'], false, $c);
+				if ($r)
+					$host = 'ssl://'.$_SERVER['HTTP_HOST'];
+				else
+					$host = $_SERVER['HTTP_HOST'].(strpos($_SERVER['HTTP_HOST'], ':') ? '' : ':'.$_SERVER['SERVER_PORT']);
+
+				$res[$iid] = new identity_switch_rpc();
 				if (!$res[$iid]->open($host))
 				{
 					self::write_data($iid.'##'.$res[$iid]);

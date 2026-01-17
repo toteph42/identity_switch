@@ -547,11 +547,24 @@ class identity_switch extends identity_switch_prefs
 			// The host, we want to reach out
 			if (!is_resource($cfg['fp']))
 			{
-			    $host = ($_SERVER['SERVER_PORT'] != '80' ? 'ssl://' : '').$_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];
+				// #71 check whether host supports SSL
+				$c = stream_context_create([
+				    'ssl' => [
+				        'verify_peer' => false,
+				        'verify_peer_name' => false,
+				    ]
+				]);
+
+				$r = @file_get_contents($_SERVER['HTTP_HOST'], false, $c);
+				if ($r)
+					$host = 'ssl://'.$_SERVER['HTTP_HOST'];
+				else
+					$host = $_SERVER['HTTP_HOST'].(strpos($_SERVER['HTTP_HOST'], ':') ? '' : ':'.$_SERVER['SERVER_PORT']);
+
 			    self::set('config', 'fp', $cfg['fp'] = new identity_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log(__FILE__, __LINE__, 'Cannot open connection - '.$cfg['fp'].' for '.$host.' - stop checking');
+					$this->write_log(__FILE__, __LINE__, 'Cannot open connection for '.$host.' - stop checking');
 					return $args;
 				}
 				self::write_log(__FILE__, __LINE__, 'Host "'.$host.'" connected', true);

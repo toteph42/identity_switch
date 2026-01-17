@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.17
+
+* Enabled plugin to use any port available for asynchroneous background system
+
 ## Release 2.0.16
 
 * Moved 'interval' parameter to domain configuration
