@@ -64,11 +64,11 @@ $config['identity_switch.config'] = [
 	//		'delimiter' => '/',
 	//	],
 
-	// Allow logging to 'logs/identity_switch.log'. Default is false.
-	'logging'		=> false,
-
-	// Enable some debugging messges in log file. Default is false
-	'debug' 		=> false,
+	// Set logging level ('logs/identity_switch.log'). 
+	// 0 = None (default)
+	// 1 = Exceution messages
+	// 2 = Additional debug mesages
+	'logging'		=> 0,
 
 	// Allow new mail checking. Default is true.
 	'check' 		=> true,

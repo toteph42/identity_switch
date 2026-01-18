@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 2.0.18
+
+* Logging rewritten
+* Fixed bug created by issue #71
+
 ## Release 2.0.17
 
 * Enabled plugin to use any port available for asynchroneous background system

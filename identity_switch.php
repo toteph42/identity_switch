@@ -13,8 +13,7 @@ declare(strict_types=1);
  * 	Data structure
  *
  * 	config 				configuration data
- * 		logging			allow logging to 'logs/identity_switch.log'
- * 		debug			log debug message to 'logs/identity_switch.log'
+ * 		logging			loggin level to 'logs/identity_switch.log'
  * 		check			allow new mail checking
  * 		interval		specify interval for checking of new mails
  * 		delay			delay between each new mail check
@@ -544,27 +543,24 @@ class identity_switch extends identity_switch_prefs
 
 		if ($chk && !file_exists($cfg['cache']))
 		{
-			// The host, we want to reach out
+			// Any connection available?
 			if (!is_resource($cfg['fp']))
 			{
 				// #71 check whether host supports SSL
-				$c = stream_context_create([
-				    'ssl' => [
-				        'verify_peer' => false,
-				        'verify_peer_name' => false,
-				    ]
-				]);
-
-				$r = @file_get_contents($_SERVER['HTTP_HOST'], false, $c);
-				if ($r)
-					$host = 'ssl://'.$_SERVER['HTTP_HOST'];
+				// host with port?[
+				if (strpos($_SERVER['HTTP_HOST'], ':'))
+					$c = explode(':', $_SERVER['HTTP_HOST']);
 				else
-					$host = $_SERVER['HTTP_HOST'].(strpos($_SERVER['HTTP_HOST'], ':') ? '' : ':'.$_SERVER['SERVER_PORT']);
+					$c = [ $_SERVER['HTTP_HOST'], $_SERVER['SERVER_PORT'] ];
+				if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
+					$host = 'ssl://';
+
+				$host .= $c[0].':'.$c[1];
 
 			    self::set('config', 'fp', $cfg['fp'] = new identity_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log(__FILE__, __LINE__, 'Cannot open connection for '.$host.' - stop checking');
+					$this->write_log(__FILE__, __LINE__, 'Cannot open connection for "'.$host.'" - stop checking');
 					return $args;
 				}
 				self::write_log(__FILE__, __LINE__, 'Host "'.$host.'" connected', true);
@@ -586,7 +582,8 @@ class identity_switch extends identity_switch_prefs
 				return $args;
 			}
 			self::write_log(__FILE__, __LINE__, 'Request started "'.$req.'"', true);
-		}
+		} else
+			self::write_log(__FILE__, __LINE__, 'We assume connection is still alive and cache file "'.$cfg['cache'].'" is available', true);
 
 		// check for data file
 		$n = 0;
@@ -606,6 +603,8 @@ class identity_switch extends identity_switch_prefs
 		$wrk = file_get_contents($cfg['data']);
 		@unlink($cfg['data']);
 
+		$ok = true;
+
 		// process data lines
 		if (is_string($wrk))
 		{
@@ -623,6 +622,7 @@ class identity_switch extends identity_switch_prefs
 				if (!$r[1] && isset($r[2]))
 				{
 					$this->write_log(__FILE__, __LINE__, 'NewMail error: '.$r[2]);
+					$ok = false;
 					continue;
 				}
 
@@ -646,9 +646,12 @@ class identity_switch extends identity_switch_prefs
 					self::set($r[1], 'checked_last', $r[0]);
 			}
 
-			self::write_log(__FILE__, __LINE__, 'Starting notification.', true);
+			if ($ok)
+			{
+				self::write_log(__FILE__, __LINE__, 'Starting notification.', true);
 
-			self::do_notify();
+				self::do_notify();
+			}
 		}
 
 		return $args;

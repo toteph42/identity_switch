@@ -1201,8 +1201,8 @@ class identity_switch_prefs extends rcube_plugin
 			$rc = rcmail::get_instance();
 			foreach ($rc->config->get('identity_switch.config', []) as $k => $v)
 			{
-				if ($k == 'logging' || $k == 'debug')
-					self::set('config', $k, (bool)$v, false);
+				if ($k == 'logging')
+					self::set('config', $k, (int)$v, 0);
 				if ($k == 'check')
 					self::set('config', $k, (bool)$v, true);
 				if ($k == 'delay')
@@ -1282,10 +1282,13 @@ class identity_switch_prefs extends rcube_plugin
 	 */
 	static public function write_log(string $file, int $line, string $txt, bool $debug = false): void
 	{
-		if (!$debug && isset($_SESSION[self::TABLE]['config']) && $_SESSION[self::TABLE]['config']['logging'])
+		if (!isset($_SESSION[self::TABLE]['config']))
+			return;
+
+		if (!$debug && $_SESSION[self::TABLE]['config']['logging'] > 0)
 			rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
 
-		if ($debug && isset($_SESSION[self::TABLE]['config']) && $_SESSION[self::TABLE]['config']['debug'])
+		if ($debug && $_SESSION[self::TABLE]['config']['logging'] == 2)
 			rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
 	}
 

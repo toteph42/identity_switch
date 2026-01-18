@@ -30,7 +30,7 @@ class identity_switch_newmails extends identity_switch_rpc {
 
 		identity_switch_prefs::write_log(__FILE__, __LINE__, 'Starting', true);
 
-		// get Identity id
+		// get identity id
 		if (is_null($iid = rcube_utils::get_input_value('iid', rcube_utils::INPUT_GET)))
 		{
 			identity_switch_prefs::write_log(__FILE__, __LINE__, 'Cannot load identity id - stop checking', true);
@@ -60,7 +60,6 @@ class identity_switch_newmails extends identity_switch_rpc {
 		// save logging configuration
 		$_SESSION[identity_switch_prefs::TABLE]['config'] = [
 			'logging' => $this->cache['config']['logging'],
-			'debug' => $this->cache['config']['debug'],
 		];
 
 		if (!$iid)
@@ -72,18 +71,15 @@ class identity_switch_newmails extends identity_switch_rpc {
 					continue;
 
 				// #71 check whether host supports SSL
-				$c = stream_context_create([
-				    'ssl' => [
-				        'verify_peer' => false,
-				        'verify_peer_name' => false,
-				    ]
-				]);
-
-				$r = @file_get_contents($_SERVER['HTTP_HOST'], false, $c);
-				if ($r)
-					$host = 'ssl://'.$_SERVER['HTTP_HOST'];
+				// host with port?[
+				if (strpos($_SERVER['HTTP_HOST'], ':'))
+					$c = explode(':', $_SERVER['HTTP_HOST']);
 				else
-					$host = $_SERVER['HTTP_HOST'].(strpos($_SERVER['HTTP_HOST'], ':') ? '' : ':'.$_SERVER['SERVER_PORT']);
+					$c = [ $_SERVER['HTTP_HOST'], $_SERVER['SERVER_PORT'] ];
+				if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
+					$host = 'ssl://';
+
+				$host .= $c[0].':'.$c[1];
 
 				$res[$iid] = new identity_switch_rpc();
 				if (!$res[$iid]->open($host))
