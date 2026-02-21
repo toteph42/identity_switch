@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 2.0.19
+
+* Meged pull request from n3storm
+
 ## Release 2.0.18
 
 * Logging rewritten
