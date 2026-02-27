@@ -1,13 +1,17 @@
 # Changelog identity switch plugin
 
+## Release 2.0.20
+
+* #074 Changed relative to absolute path
+
 ## Release 2.0.19
 
-* Meged pull request from n3storm
+* #072 Meged pull request from n3storm
 
 ## Release 2.0.18
 
 * Logging rewritten
-* Fixed bug created by issue #71
+* #071 Fixed bug 
 
 ## Release 2.0.17
 

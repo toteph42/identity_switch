@@ -92,7 +92,7 @@ class identity_switch extends identity_switch_prefs
 		$this->include_stylesheet('assets/identity_switch.css');
 
 		// check for symlink in public_html for RoundCube >= 1.6
-		$link = 'plugins/identity_switch';
+		$link = \INSTALL_PATH.'public_html/plugins/identity_switch';
 	    $fs = new Filesystem();
 		if (!$fs->exists($link)) {
 
