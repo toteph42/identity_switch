@@ -4,13 +4,13 @@ declare(strict_types=1);
 /*
  * 	Identity switch RoundCube Bundle
  *
- *	@copyright	(c) 2024 - 2025 Florian Daeumling, Germany. All right reserved
+ *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
  * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
 // include environment
 if (!defined('INSTALL_PATH'))
-	define('INSTALL_PATH', realpath($_SERVER['DOCUMENT_ROOT'].'/../').'/');
+	define('INSTALL_PATH', realpath(__DIR__ . '/../../') . '/');
 require_once \INSTALL_PATH.'program/include/iniset.php';
 require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_rpc.php';
 require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
