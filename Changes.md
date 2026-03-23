@@ -1,6 +1,6 @@
 # Changelog identity switch plugin
 
-## Release 2.0.21
+## Release 2.0.22
 
 * #076 Changed INSTALL_PAATH 
 

@@ -1197,22 +1197,18 @@ class identity_switch_prefs extends rcube_plugin
 		// load configuration?
 		if (!isset($_SESSION[self::TABLE]['config']))
 		{
-			parent::load_config();
-			$rc = rcmail::get_instance();
-			foreach ($rc->config->get('identity_switch.config', []) as $k => $v)
+			// first load default config #031
+			foreach ( [ 'config.inc.php.dist', 'config.inc.php'] as $file)
 			{
-				if ($k == 'logging')
-					self::set('config', $k, (int)$v, 0);
-				if ($k == 'check')
-					self::set('config', $k, (bool)$v, true);
-				if ($k == 'delay')
-					self::set('config', $k, (int)$v, 0);
-				if ($k == 'retries')
-					self::set('config', $k, (int)$v, 10);
-				if ($k == 'wait')
-					self::set('config', $k, (int)$v, 60);
-				if ($k == 'dropdown_size')
-					self::set('config', $k, (int)$v, 34);
+				parent::load_config($file);
+				$rc = rcmail::get_instance();
+				foreach ($rc->config->get('identity_switch.config', []) as $k => $v)
+				{
+					if ($k == 'check')
+						self::set('config', $k, (bool)$v, true);
+					else
+						self::set('config', $k, (int)$v);
+				}
 			}
 			self::set('iid', 0);
 			self::set('config', 'language', $_SESSION['language']);
