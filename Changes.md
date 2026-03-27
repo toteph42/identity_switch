@@ -1,5 +1,13 @@
 # Changelog identity switch plugin
 
+## Release 2.0.24
+
+* #079 Hungarian langague translation added
+
+## Release 2.0.23
+
+* #031 Loading config.inc.php.dist before config.inc.php to prevent missing parameters
+
 ## Release 2.0.22
 
 * #076 Changed INSTALL_PAATH 
