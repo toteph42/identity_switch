@@ -121,14 +121,12 @@ class identity_switch_prefs extends rcube_plugin
 		} else
 			$str .= $key.' = ';
 
-		$rc = rcmail::get_instance();
-
 		if(is_bool($val))
 	        $str .= ($val ? 'true' : 'false').";\n";
 	    elseif (!strlen((string)$val))
 	        $str .= "null;\n";
 	    elseif (strpos($key, 'pass') && $key != '%p')
-	        $str .= "'".$rc->decrypt($val)."';\n";
+	        $str .= "'●●●●●●●●';\n";
 	    else
 	       	$str .= "'".$val."';\n";
 

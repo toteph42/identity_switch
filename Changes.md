@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 3.0.1
+
+* Don't show passwords
+ 
 ## Release 3.0.0
 
 * Plugin rewritten.

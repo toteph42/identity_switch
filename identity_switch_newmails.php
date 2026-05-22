@@ -11,7 +11,6 @@ declare(strict_types=1);
 // include environment
 if (!defined('INSTALL_PATH'))
 	define('INSTALL_PATH', gethostname() == 'Jolly' ? 'D:/www/syncgw/': realpath(__DIR__.'/../../').'/');
-##	define('INSTALL_PATH', realpath(__DIR__.'/../../').'/');
 
 require_once \INSTALL_PATH.'program/include/iniset.php';
 require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_rpc.php';

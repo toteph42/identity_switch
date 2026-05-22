@@ -15,9 +15,15 @@ class identity_switch_migrate extends identity_switch_cfg
 	{
 		$rc = rcmail::get_instance();
 
-		$sql = 'SELECT * FROM '.$rc->db->table_name('identity_switch', true);
-		if (!($q = $rc->db->query($sql)))
+		// Already migrated?
+		$sql = 'SELECT * FROM '.$rc->db->table_name('identities', true).
+			   ' WHERE `identity_switch_prefs` IS NOT NULL LIMIT 1';
+		$q = $rc->db->query($sql);
+		if ($rc->db->fetch_assoc($q))
 			return;
+
+		$sql = 'SELECT * FROM '.$rc->db->table_name('identity_switch', true);
+		$q = $rc->db->query($sql);
 		while ($r = $rc->db->fetch_assoc($q))
 		{
 			if (!$r['flags'])

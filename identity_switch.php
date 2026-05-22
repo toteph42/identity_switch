@@ -55,7 +55,6 @@ class identity_switch extends identity_switch_cfg
 	function init(): void
 	{
 
-##		unset($_SESSION['identity_switch']);
 		$rc = rcmail::get_instance();
 
 		// identity switch hooks and actions

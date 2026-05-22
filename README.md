@@ -32,7 +32,7 @@ There are some new setting available in `Preference` -> `Mailbox view`.
 If you select an identity to edit, then you'll see an additional box name **Preferences managed by identity_switch plugin**  with all user preferences used for this identity. You may edit the seeting and save them to the idenity. 
 
 Please note:
-* All passwords were shown decryped (clear text). They will be immediatly encrypted when you hit the save button.
+* All passwords were show as ●●●●●●●●. If you enter a new password, it will be stored encrypted.
 * If you set the `cfg_hide_pref` to `true`, then all preferences will be hidden. 
 * Most of the settings were defined in `default.inc.php`. For a descption about allowed content please refer to`config/default.inc.php`. 
 * You may change any of the given preferences or you may also add new user preferences for this identity.
