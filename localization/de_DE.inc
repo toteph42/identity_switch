@@ -9,57 +9,19 @@ declare(strict_types=1);
  */
 $labels = [];
 
-$labels['idsw.common.caption'] = 'Daten der Identität';
-$labels['idsw.common.noedit'] = 'Informationen zur Identität können vor dem ersten Speichern nicht eingegeben werden';
-$labels['idsw.common.enabled'] = 'Aktiviert';
-$labels['idsw.common.label'] = 'Bezeichnung';
-
-$labels['idsw.imap.caption'] = 'IMAP';
-$labels['idsw.imap.user'] = 'Benutzername';
-$labels['idsw.imap.pwd'] = 'Passwort';
-$labels['idsw.imap.host'] = 'Servername';
-$labels['idsw.imap.auth'] = 'Verschlüsselung';
-$labels['idsw.imap.auth.none'] = 'Keine';
-$labels['idsw.imap.auth.ssl'] = 'SSL';
-$labels['idsw.imap.auth.tls'] = 'TLS';
-$labels['idsw.imap.port'] = 'Port';
-$labels['idsw.imap.delim'] = 'Verzeichnistrenner';
-
-$labels['idsw.smtp.caption'] = 'SMTP';
-$labels['idsw.smtp.user'] = 'Benutzername';
-$labels['idsw.smtp.pwd'] = 'Passwort';
-$labels['idsw.smtp.host'] = 'Servername';
-$labels['idsw.smtp.tls'] = 'Sichere Verbindung (TLS)';
-$labels['idsw.smtp.port'] = 'Port';
-$labels['idsw.smtp.auth'] = 'Verschlüsselung';
-$labels['idsw.smtp.auth.none'] = 'Keine';
-$labels['idsw.smtp.auth.ssl'] = 'SSL';
-$labels['idsw.smtp.auth.tls'] = 'TLS';
-
-$labels['idsw.notify.caption'] = 'Neue Nachrichten';
-$labels['idsw.notify.allfolder'] = 'Alle Ordner auf neue Nachrichten prüfen';
-$labels['idsw.notify.basic'] = 'Benachrichtigung im Browser bei neuer Nachricht';
-$labels['idsw.notify.desktop'] = 'Desktop-Benachrichtigung bei neuer Nachricht';
-$labels['idsw.notify.timeout'] = 'Desktop-Benachrichtigung schließen';
-$labels['idsw.notify.sound'] = 'Akustische Meldung bei neuer Nachricht';
-$labels['idsw.notify.test'] = 'Test';
-
-$labels['idsw.err.imap.user.miss'] = 'Der Wert im Feld \'IMAP Benutzername\' fehlt.';
-$labels['idsw.err.imap.pwd.miss'] = 'Der Wert im Feld \'IMAP Password\' fehlt.';
-$labels['idsw.err.imap.host.miss'] = 'Der Wert im Feld \'IMAP Server host name\' fehlt.';
-$labels['idsw.err.imap.port.num'] = 'Der Wert in \'IMAP Port\' muss eine Zahl sein.';
-$labels['idsw.err.imap.port.range'] = 'Der Wert in \'IMAP Port\' muss zwischen 1 und 65535 liegen.';
-$labels['idsw.err.imap.delim.miss'] = 'Der Wert im Feld \'IMAP Verzeichnistrenner\' fehlt.';
-$labels['idsw.err.smtp.user.miss'] = 'Der Wert im Feld \'SMTP Benutzername\' fehlt.';
-$labels['idsw.err.smtp.pwd.miss'] = 'Der Wert im Feld \'SMTP Password\' fehlt.';
-$labels['idsw.err.smtp.host.miss'] = 'Der Wert im Feld \'SMTP Servername\' fehlt.';
-$labels['idsw.err.smtp.port.num'] = 'Der Wert in \'SMTP Port\' muss eine Zahl sein.';
-$labels['idsw.err.smtp.port.range'] = 'Der Wert in \'SMTP Port\' muss zwischen 1 und 65535 liegen.';
-
-$labels['identity'] = 'Identität';
-$labels['notify.title'] = 'Neue E-Mails';
-$labels['notify.msg'] = '%d für %s';
-$labels['notify.err.autoplay'] = 'Kann Musik nicht abspielen!'."\r\n".
-								 'Bitte überprüfen Sie die Einstellungen der "Automatische Wiedergabe" für diese Seite in Ihrem Browser.';
-$labels['notify.err.notification'] = 'Kann Benachrichtigung nicht senden!.'."\r\n".
-								 'Bitte überprüfen Sie die Einstellungen der "Benachrichtigungen" für diese Seite in Ihrem Browser.';
+$labels['isw.common.label'] = 'Name der Identität im Auswahlmenü';
+$labels['isw.notify.caption'] = 'Neue Nachrichten';
+$labels['isw.notify.basic'] = 'Benachrichtigung im Browser bei neuer Nachricht';
+$labels['isw.notify.desktop'] = 'Desktop-Benachrichtigung bei neuer Nachricht';
+$labels['isw.notify.timeout'] = 'Desktop-Benachrichtigung schließen';
+$labels['isw.notify.sound'] = 'Akustische Meldung bei neuer Nachricht';
+$labels['isw.notify.test'] = 'Test';
+$labels['isw.used.prefs'] = 'Vom identity_switch Plugin verwaltete Einstellungen';
+$labels['isw.hide.prefs'] = 'Einstellung werden aufgrund der Plugin-Konfiguration nicht angezeigt.';
+$labels['isw.identity'] = 'Identität';
+$labels['isw.notify.title'] = 'Neue E-Mails';
+$labels['isw.notify.msg'] = '%d für %s';
+$labels['isw.notify.err.autoplay'] = 'Kann Musik nicht abspielen!'."\r\n".
+					 'Bitte überprüfen Sie die Einstellungen der "Automatische Wiedergabe" für diese Seite in Ihrem Browser.';
+$labels['isw.notify.err.notification'] = 'Kann Benachrichtigung nicht senden!.'."\r\n".
+					 'Bitte überprüfen Sie die Einstellungen der "Benachrichtigungen" für diese Seite in Ihrem Browser.';

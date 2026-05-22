@@ -1,5 +1,5 @@
 --
--- 	Identity switch RoundCube Bundle
+-- 	Identity switch RoundCube Bundlee
 --
 --	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
 -- 	@license 	https://github.com/toteph42/identity_switch2/blob/master/LICENSE

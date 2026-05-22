@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 3.0.0
+
+* Plugin rewritten.
+* Oauth interface prepared.
+
 ## Release 2.0.24
 
 * #079 Hungarian langague translation added
@@ -344,7 +349,7 @@
 
 ## Release 1.0.14
 
-* Error message prefixed by "idsw".
+* Error message prefixed by "isw".
 * If identity is set as default, hen disable identity_switch handling.
 * If a new record is created, it is not possible to return any error message due to RoundCube design.
 * Fixed some error messages.

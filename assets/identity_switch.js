@@ -140,17 +140,23 @@ function identity_switch_fixIdent(iid) {
 }
 
 // Open/close menu
-function identity_switch_toggle_menu(off) {
+function identity_switch_toggle_menu(offset) {
 	var d = $('#identity_switch_dropdown'); 
 
 	if (d.is(':hidden')) {
 		// reload window to show new mail counter in menu
-		d.load(location.href + ' #identity_switch_dropdown > *', '');
+		d.load(location.href + ' #identity_switch_dropdown > *', function( response, status, xhr ) {
+			// special hack for ROundCube <= 1.7
+			if (response.indexOf('DOCTYPE') == -1 ) {
+				response = JSON.parse(response);
+			 	d.append(response['identity_switch_dropdown']);
+			}
+		});
 		d.show();
 		$('#messagelist-fixedcopy').css('z-index', 'auto');
 		
 		// scroll to iid
-		d.scrollTop(off);
+		d.scrollTop(offset);
 	} else
 		d.hide();
 }
