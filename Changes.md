@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 3.0.2
+
+* Bug fixed when creating new identity
+
 ## Release 3.0.1
 
 * Don't show passwords

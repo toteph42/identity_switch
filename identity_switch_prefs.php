@@ -37,7 +37,8 @@ class identity_switch_prefs extends rcube_plugin
 	{
 		$this->add_texts('localization');
 
-        $iid = (int)$args['record']['identity_id'];
+        $iid   = !isset($args['record']['identity_id']) ? (int)identity_switch_cfg::get('cfg', 'iid') :
+        		 (int)$args['record']['identity_id'];
 		$val = identity_switch_cfg::get($iid, 'isw_label');
 		$fld = rcube_output::get_edit_field('isw_label', $val, [
             						'label' 	=> rcube::Q($this->gettext('isw.common.label')),
