@@ -1,5 +1,12 @@
 # Changelog identity switch plugin
 
+## Release 3.0.3
+
+* Bug fixed parsing of array preferences
+* Bug fixed when storing passwords
+* Accepting '%p' for isw_smtp_pass
+* Impelement deletion of parameters
+
 ## Release 3.0.2
 
 * Bug fixed when creating new identity
