@@ -11,6 +11,34 @@ declare(strict_types=1);
 class identity_switch_prefs extends rcube_plugin
 {
 
+	/*
+	 * 	Test cases
+	 *
+
+	 	Xbool = true;
+	 	Xnull = null;
+	 	Xpass1 = '%p';
+	 	Xpassword = '123456';
+	  	Xstring = 'Zeichen';
+
+	 	-- simple empty array 1. dimension
+	  	array1[1] = 'String';
+	 	-- missing closing bracket and EOL
+	 	array2 = [
+	 	-- empty array
+	 	array2 = [];
+	 	-- a bit more complex
+	 	array3[1] = [];
+	 	array4[1] = null;
+	 	array5[1] = false;
+	 	-- complex 2. dimensional array
+	 	array6[1][2] = 'String';
+	 	array7[1][2] = true;
+	 	-- complex 4. dimensional array
+	 	array8[1][2][3][4] = null;
+
+	 */
+
 	/**
 	 * 	Initialize Plugin
 	 *
@@ -67,8 +95,7 @@ class identity_switch_prefs extends rcube_plugin
 			$cfg = rcube::Q($this->gettext('isw.hide.prefs'));
 		else
 		{
-			$t = identity_switch_cfg::get($iid);
-			if (is_array($t))
+			if (is_array($t = identity_switch_cfg::get($iid)))
 			    foreach ($t as $k => $v)
 	        		$cfg .= self::show_val($k, $v);
 		}
@@ -100,7 +127,7 @@ class identity_switch_prefs extends rcube_plugin
 
 		$str = '';
 
-		// do not show internal parameters
+		// hide internal parameters
 	    if (substr($key, 0, 1) == '_' || $key == 'isw_label')
 	        return $str;
 
@@ -112,14 +139,17 @@ class identity_switch_prefs extends rcube_plugin
 			$nl = true;
         	foreach ($val as $k => $v)
 	        {
+	        	// convert stdClass to array (multidimensional array)
+	        	if (is_object($v))
+	        		$v = get_object_vars($v);
 		        if (is_array($v))
         			return $str.self::show_val($key.'['.$k.']', $v);
 	        	if ($nl)
 		        {
 		        	$nl = false;
-		        	$str .= $key."[";
+		        	$str .= $key;
 		        }
-	        	$str .= $k."] = '".$v."';\n";
+	        	$str .= self::show_val('['.$k.']', $v);;
 	        	$nl = true;
     	    }
         	return $str;
@@ -128,12 +158,12 @@ class identity_switch_prefs extends rcube_plugin
 
 		if(is_bool($val))
 	        $str .= ($val ? 'true' : 'false').";\n";
-	    elseif (!strlen((string)$val))
+	    elseif (!is_object($val) && !strlen((string)$val))
 	        $str .= "null;\n";
-	    elseif (strpos($key, 'pass') && $key != '%p')
+	    elseif (strpos($key, 'pass') !== false && $val != '%p')
 	        $str .= "'●●●●●●●●';\n";
 	    else
-	       	$str .= "'".$val."';\n";
+	       	$str .= "'".(is_object($val) ? get_class($val) : $val)."';\n";
 
 	    return $str;
 	}
@@ -165,15 +195,19 @@ class identity_switch_prefs extends rcube_plugin
 	function save_isw_prefs(array $args): array
 	{
 		// saving identity data
-		$iid   = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
-		$prefs = identity_switch_cfg::get($iid);
+		$iid    = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
+		$prefs  = identity_switch_cfg::get($iid);
+		$nprefs = [];
+
+		// get list of locked preferences
+		$no_override = rcmail::get_instance()->config->get('dont_override');
 
 		// delete all non-internal preferences
 		if (is_array($prefs))
 		{
 			foreach ($prefs as $k => $v)
-				if (substr($k, 0, 4) == 'isw_' && !strpos($k, 'pass') && $k != 'isw_label')
-					unset($prefs[$k]);
+				if (substr($k, 0, 1) == '_')
+					$nprefs[$k] = $prefs[$k];
 		} else
 			$prefs = [];
 
@@ -183,7 +217,8 @@ class identity_switch_prefs extends rcube_plugin
 			{
 			case 'general':
 				$k = 'isw_refresh_interval';
-				$prefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
+				if (!isset($no_override[$k]))
+					$nprefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
 				break;
 
 			case 'mailbox':
@@ -194,7 +229,8 @@ class identity_switch_prefs extends rcube_plugin
 						   'isw_notification_sound' ] as $k)
 				{
 					$v = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
-					$prefs[$k] = is_null($v) ? false : true;
+					if (isset($no_override[$k]))
+						$nprefs[$k] = is_null($v) ? false : true;
 				}
 
 			default:
@@ -202,19 +238,26 @@ class identity_switch_prefs extends rcube_plugin
 			}
 		} else
 		{
-
-			if ($v = rcube_utils::get_input_value('_isw_label', rcube_utils::INPUT_POST))
-				$prefs['isw_label'] = $v;
+			$nprefs['isw_label'] = rcube_utils::get_input_value('_isw_label', rcube_utils::INPUT_POST);
 
 			if ($v = rcube_utils::get_input_value('_isw_prefs', rcube_utils::INPUT_POST))
 				foreach (explode("\n", $v) as $r)
-					self::get_val($prefs, $r);
+					self::get_val($nprefs, $r);
 		}
+
+		// special password check
+		foreach ($nprefs as $k => $v)
+			if (strpos($k, 'pass') !== false)
+			{
+				// swap old password?
+				if ($v == '●●●●●●●●')
+					$nprefs[$k] = $prefs[$k];
+			}
 
 		// replace preferences
 		identity_switch_cfg::del($iid);
-		ksort($prefs);
-		identity_switch_cfg::set($iid, $prefs);
+		ksort($nprefs);
+		identity_switch_cfg::set($iid, $nprefs);
 
 		// save user preferences
 		identity_switch_cfg::save_cfg($iid);
@@ -238,52 +281,29 @@ class identity_switch_prefs extends rcube_plugin
 			return;
 
 		// check for array
-		// -- simple array 1. dimension
-		// imap_message_flags[JUNK] = 'Junk';
-		// -- complex array 2. dimension
-		// smtp_conn_options[ssl][verify_peer] = '1';
-		// -- complex array 3. dimension
-		// test[1][2][3][4] = 'val';
 		if ($p = strpos($row, '['))
 		{
 			// extract master key
-
-			// [isw_imap_message_flags]
-			// [isw_smtp_conn_options]
-			// [test]
-
-			$k    = trim(substr($row, 0, $p - 1), '= ');
+			$k    = trim(substr($row, 0, $p), '= ');
 			$pref = &$prefs[$k];
-			$row  = substr($row, $p);
-
-			// empty array?
-			// = [];
-			if (strpos($row, '[]') !== false)
-			{
-				$prefs[$k] = [];
-				return;
-			}
+			$row  = trim(substr($row, $p));
 
 			// extract sub keys
-
-			// [isw_imap_message_flags][JUNK]
-			// [isw_smtp_conn_options][ssl][verify_peer]
-			// [test][1][2][3][4]
-
 			while (strpos($row, '[') !== false)
 			{
 				$row = substr($row, 1);
+				// missing ']'
 				if (($p = strpos($row, ']')) === false)
-					; // missing ']'
-				$k    = substr($row, 0, $p);
-				$pref = &$pref[$k];
-				$row  = substr($row, $p + 1);
+					$p = 0;
+				if (($k = substr($row, 0, $p)) && $k != '[')
+					$pref = &$pref[$k];
+				$row  = trim(substr($row, $p + 1), ' =');
 			}
 
-			// = 'Junk';
-			// = '1';
-			// = 'val';
-			$pref = trim($row, " =;'");
+			if ($row == ';')
+				$pref = [];
+			else
+				$pref = self::chk_type(trim($row, " =;'"));
 
 			return;
 		}
@@ -292,29 +312,25 @@ class identity_switch_prefs extends rcube_plugin
 		list($k, $v) = explode(' =', $row);
 		$k = trim($k, " \t");
 		$v = rtrim($v, " ;\n\r");
-		$v = self::val_val($k, trim($v, " '"));
+		$v = self::chk_type(trim($v, " '"));
 
 		// special password check
-		if (strpos($k, 'pass'))
-		{
-			if ($v == '●●●●●●●●')
-				return;
-			if ($v != '%p')
+		if (strpos($k, 'pass') !== false)
+			if ($v != '%p' && $v != '●●●●●●●●')
 				$v = rcmail::get_instance()->encrypt($v);
-		}
+
 		$prefs[$k] = $v;
 
 		return;
 	}
 
 	/**
-	 * 	Validate key pair
+	 * 	Validate variable type
 	 *
-	 * 	@param string $key
 	 * 	@param string $val
 	 * 	@return mixed
 	 */
-	private function val_val(string $key, string $val): mixed {
+	private function chk_type(string $val): mixed {
 
 		switch ($val)
 		{
@@ -332,6 +348,7 @@ class identity_switch_prefs extends rcube_plugin
 		default:
 			break;
 		}
+
 		return $val;
 	}
 
@@ -350,7 +367,7 @@ class identity_switch_prefs extends rcube_plugin
 		$set  = &$args['blocks']['main']['options'];
 		$mini = $rc->config->get('min_refresh_interval');
 
-		// get list of locked parameters
+		// get list of locked preferences
 		$no_override = $rc->config->get('dont_override');
 
 		// delete std. entry
@@ -395,7 +412,7 @@ class identity_switch_prefs extends rcube_plugin
 		$iid = identity_switch_cfg::get('cfg', 'iid');
 		$rec = identity_switch_cfg::get($iid);
 
-		// get helper functions
+		// get list of locked preferences
 		$no_override = $rc->config->get('dont_override');
 
 		$set = &$args['blocks']['new_message'];

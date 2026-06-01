@@ -54,13 +54,12 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function init(): void
 	{
-
+## unset($_SESSION[identity_switch_cfg::TABLE]);
 		$rc = rcmail::get_instance();
 
 		// identity switch hooks and actions
 		$this->add_hook('startup', 						  [ $this, 'on_startup' ]);
 		$this->add_hook('render_page', 					  [ $this, 'on_render_page' ]);
-		$this->add_hook('render_response', 				  [ $this, 'on_render_response' ]);
 		$this->add_hook('template_object_composeheaders', [ $this, 'on_object_composeheaders' ]);
 		$this->add_hook('storage_connect', 				  [ $this, 'on_storage_connect' ]);
 		$this->add_hook('smtp_connect', 				  [ $this, 'on_smtp_connect' ]);
@@ -69,43 +68,46 @@ class identity_switch extends identity_switch_cfg
 		// register our own action handler
 		$this->register_action('identity_switch_do',  	  [ $this, 'do_switch' ]);
 
-		// preference hooks and actions
+
+		if (!isset($_SESSION[identity_switch_cfg::TABLE]))
+		{
+			// check for symlink in public_html for RoundCube >= 1.6
+			$link = \INSTALL_PATH.'public_html/plugins/identity_switch';
+		    $fs = new Filesystem();
+			if (!$fs->exists($link))
+			{
+
+				if (!$fs->exists(\INSTALL_PATH.'public_html/'.$link))
+				{
+
+		    		$path = \INSTALL_PATH.'plugins/identity_switch';
+
+		    		// check for Windows OS
+					if ('\\' === \DIRECTORY_SEPARATOR)
+		    			$fs->symlink($path, $link);
+			    	else
+			    		$fs->symlink(Path::makeRelative($path, Path::getDirectory($link)), $link);
+
+			    	self::write_log(__FILE__, __LINE__, 'Creating symlink "'.$link.'" to "'.$path.'"', true);
+		    	}
+		    }
+
+		    // check for migration
+	    	new identity_switch_migrate();
+		}
+
+		// load settings
 		parent::init();
 
 		// notification hooks and action
-		if ($rc->output instanceof rcmail_output_html) {
-			$rc->output->add_script('identity_switch_init();', 'head_top');
+		if ($rc->output instanceof rcmail_output_html)
 			$rc->output->include_script('../../plugins/identity_switch/assets/identity_switch.js');
-		}
 
 		// new mail hooks and action
-		$this->add_hook('new_messages', 				  [ $this, 'catch_newmails' ]);
-		$this->add_hook('refresh', 			  			  [ $this, 'check_newmails' ]);
-		$this->add_hook('ready',	 					  [ $this, 'check_newmails' ]);
+		$this->add_hook('refresh', 			  			  [ $this, 'check_unseen' ]);
+		$this->add_hook('ready',	 					  [ $this, 'check_unseen' ]);
 
 		$this->include_stylesheet('assets/identity_switch.css');
-
-		// check for symlink in public_html for RoundCube >= 1.6
-		$link = \INSTALL_PATH.'public_html/plugins/identity_switch';
-	    $fs = new Filesystem();
-		if (!$fs->exists($link)) {
-
-			if (!$fs->exists(\INSTALL_PATH.'public_html/'.$link)) {
-
-	    		$path = \INSTALL_PATH.'plugins/identity_switch';
-
-	    		// check for Windows OS
-				if ('\\' === \DIRECTORY_SEPARATOR)
-	    			$fs->symlink($path, $link);
-		    	else
-		    		$fs->symlink(Path::makeRelative($path, Path::getDirectory($link)), $link);
-
-		    	self::write_log(__FILE__, __LINE__, 'Creating symlink "'.$link.'" to "'.$path.'"', true);
-	    	}
-	    }
-
-	    // check for migration
-    	new identity_switch_migrate();
 	}
 
 	/**
@@ -174,75 +176,18 @@ class identity_switch extends identity_switch_cfg
 		// render UI if user has extra accounts
 		if (count($acc) > 1)
 		{
-			$div = '<div id="identity_switch_menu" '.
-				   'class="form-control" '.
-				   'onclick="identity_switch_toggle_menu('.$off * $size.')">'.
+			$div = '<div id="identity_switch_menu"'.
+				   ' class="form-control"'.
+				   ' onclick="identity_switch_toggle_menu('.$off * $size.')">'.
 				   rcube::Q(self::get($iid, 'isw_label')).
 				   '<div id="identity_switch_dropdown" style="line-height:'.$size.'px"><ul>';
-			if (substr(\RCMAIL_VERSION, 0, 3) == '1.6')
-			{
-				foreach ($acc as $name => $r)
-					$div .= '<li onclick="identity_switch_run('.$r['iid'].');"><a href="#">'.$name.
-					  	   	'<span id="identity_switch_opt_'.$r['iid'].'" class="unseen" '.
-					  	   	'style="top:'.($size >= 24 ? ((34 - $size)/2).'px' :
-					  	   	'0px;line-height:initial;font-size:x-small').'">'.
-				  	   	($r['iid'] == $iid ? "" : ($r['unseen'] > 0 ? $r['unseen'] : '')).'</span></a></li>';
-			}
-			rcmail::get_instance()->output->add_footer($div.'</ul></div></div>');
-		}
-
-		return $args;
-	}
-
-	/**
-	 * 	Provide identities list
-	 *
-	 * 	@param array $args
-	 * 	@return array
-	 */
-	function on_render_response(array $args): array
-	{
-		$this->add_texts('localization');
-
-		// build table
-		$acc = [];
-		$iid = self::get('cfg', 'iid');
-		foreach (self::get() as $k => $v)
-			// label available?
-			if (is_numeric($k) && $v['isw_label'] <> '')
-				$acc[rcube::Q($v['isw_label'])] = [ 'iid' => $k, 'unseen' => $v['_unseen'] ];
-
-		// sort identities
-		ksort($acc);
-
-		// find position of iid
-
-		$off = 0;
-		foreach ($acc as  $a)
-		{
-			// identity found?
-			if ($a['iid'] == $iid)
-				break;
-			$off++;
-		}
-
-		// get dropdown line size
-		$size = $this->get('cfg', 'lsize');
-
-		// render UI if user has extra accounts
-		if (count($acc) > 1)
-		{
-			$args['response']['identity_switch_dropdown'] = '<ul>';
-
 			foreach ($acc as $name => $r)
-				$args['response']['identity_switch_dropdown'] .=
-						'<li onclick="identity_switch_run('.$r['iid'].');"><a href="#">'.$name.
-				  	   	'<span id="identity_switch_opt_'.$r['iid'].'" class="unseen" '.
-				  	   	'style="top:'.($size >= 24 ? ((34 - $size)/2).'px' :
-				  	   	'0px;line-height:initial;font-size:x-small').'">'.
+				$div .= '<li onclick="identity_switch_run('.$r['iid'].');"><a href="#">'.$name.
+					  	'<span id="identity_switch_unseen_'.$r['iid'].'"'.
+					  	' class="unseen" style="top:'.($size >= 24 ? ((34 - $size)/2).'px':
+					  	' 0px;line-height:initial;font-size:x-small').'">'.
 				  	   	($r['iid'] == $iid ? "" : ($r['unseen'] > 0 ? $r['unseen'] : '')).'</span></a></li>';
-
-			$args['response']['identity_switch_dropdown'] .= '</ul>';
+			rcmail::get_instance()->output->add_footer($div.'</ul></div></div>');
 		}
 
 		return $args;
@@ -253,27 +198,13 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function do_switch(): void
 	{
-		$rc  = rcmail::get_instance();
-		$iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST);
+        // get new identity
+		self::set('cfg', 'iid', $iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST));
 
-		self::set('cfg', 'iid', $iid);
-
-		// sepcial hack - RoundCube does not handle storage connection correctly
 		$_SESSION['username'] = self::get($iid, 'isw_imap_user');
 		$_SESSION['password'] = self::get($iid, 'isw_imap_pass');
 
-		// update unseen counter for current user
-		$folders = [ 'INBOX' ];
-		$storage = $rc->get_storage();
-		if (self::get($iid, 'isw_check_all_folders') == '1')
-			$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
-		$unseen  = 0;
-		foreach ($folders as $mbox)
-			$unseen += $storage->count($mbox, 'UNSEEN', true, false);
-		self::set($iid, '_unseen', $unseen);
-        self::set($iid, '_checked_last', time());
-
-		$rc->output->redirect( [
+		rcmail::get_instance()->output->redirect( [
 				'_task' => 'mail',
 				'_mbox' => 'INBOX',
 		] );
@@ -379,39 +310,59 @@ class identity_switch extends identity_switch_cfg
 	}
 
 	/**
-	 * 	Catch new mail notification for default user
+	 * 	Check for unseen mails
 	 */
-	function catch_newmails(array $args): array
-	{
-        // unexpected input?
-        if (empty($args['diff']['new']))
-            return $args;
-
-        $iid = self::get('cfg', 'iid');
-        $n   = 0;
-        foreach (explode(':', $args['diff']['new']) as $id)
-        	if (strlen($id) > 1)
-        		$n++;
-        self::set($iid, '_unseen', $n);
-        self::set($iid, '_checked_last', time());
-        self::set($iid, '_notify', true);
-
-		self::do_notify();
-
- 		return $args;
-	}
-
-	/**
-	 * 	Check for number of new mails
-	 */
-	function check_newmails($args) {
+	function check_unseen($args) {
 
 		// get configuration
 		if(!is_array($cfg = self::get('cfg')))
 			return $args;
 
-		// only allow call under special conditions
-		if (!isset($args['action']) || ($args['action'] != 'refresh' && $args['action'] != 'getunread'))
+		// only refresh?
+		if (!isset($args['action']))
+			return $args;
+
+		// single mail marked as unread
+		if ($args['action'] == 'mark')
+		{
+			$iid = self::get('cfg', 'iid');
+			$n   = $_SESSION['unseen_count']['INBOX'];
+			if (self::get($iid, 'isw_check_all_folders') == '1')
+			{
+				foreach ($_SESSION['unseen_count'] as $k => $v)
+					if ($k != 'INBOX')
+						$n += $v;
+			}
+			switch (rcube_utils::get_input_string('_flag', rcube_utils::INPUT_POST))
+			{
+			case 'read':
+				$n--;
+				self::write_log(__FILE__, __LINE__, 'Mail flag "unread" deleted.', true);
+				break;
+
+			case 'unread':
+				$n++;
+				self::write_log(__FILE__, __LINE__, 'Mail flag "unread" set.', true);
+				break;
+
+			default:
+				breaK;
+			}
+
+			// something changed?
+			if (self::get($iid, '_unseen') <> $n)
+			{
+		        self::set($iid, '_unseen', $n);
+	    	    self::set($iid, '_checked_last', time());
+	        	self::set($iid, '_notify', true);
+				self::write_log(__FILE__, __LINE__, 'Starting update on unseen counter.', true);
+				self::do_unseen_update();
+			}
+
+			return $args;
+		}
+
+		if ($args['action'] && $args['action'] != 'refresh' && $args['action'] != 'getunread')
 			return $args;
 
 		self::write_log(__FILE__, __LINE__, 'Configuration loaded "'.json_encode($cfg).'".', true);
@@ -505,7 +456,7 @@ class identity_switch extends identity_switch_cfg
 		$wrk = @file_get_contents($cfg['import']);
 		@unlink($cfg['import']);
 
-		$ok = true;
+		$upd = false;
 
 		// process data lines
 		if (is_string($wrk))
@@ -519,18 +470,18 @@ class identity_switch extends identity_switch_cfg
 				if (!is_array($r))
 					continue;
 
-				// Check for error message
+				// check for error message
 				if (!$r[1] && isset($r[2]))
 				{
 					$this->write_log(__FILE__, __LINE__, 'NewMail error: '.$r[2]);
-					$ok = false;
 					continue;
 				}
 
 				$rec = self::get($r[1]);
 
-				if ($r[2] != $rec['_unseen'] && $r[0] > $rec['_checked_last'])
+				if ($r[2] <> $rec['_unseen'] && $r[0] > $rec['_checked_last'])
 				{
+					$upd = true;
 					if ($r[2] > $rec['_unseen'])
 				 		self::set($r[1], '_notify', true);
 					self::set($r[1], '_unseen', $r[2]);
@@ -539,11 +490,10 @@ class identity_switch extends identity_switch_cfg
 					self::set($r[1], '_checked_last', $r[0]);
 			}
 
-			if ($ok)
+			if ($upd)
 			{
-				self::write_log(__FILE__, __LINE__, 'Starting notification.', true);
-
-				self::do_notify();
+				self::write_log(__FILE__, __LINE__, 'Starting update on unseen counter.', true);
+				self::do_unseen_update();
 			}
 		}
 
@@ -551,11 +501,11 @@ class identity_switch extends identity_switch_cfg
 	}
 
 	/**
-	 * 	Do notification
+	 * 	Do update on unseen counter (and notify)
 	 */
-	function do_notify(): void
+	function do_unseen_update(): void
 	{
-        $rc = rcmail::get_instance();
+		$rc = rcmail::get_instance();
 
 		$this->add_texts('localization');
 
@@ -577,7 +527,8 @@ class identity_switch extends identity_switch_cfg
 				continue;
 
 			// set unseen to provide to browser
-			$ctl[$cnt]['_unseen'] = $rec['_unseen'];
+			$ctl[$cnt]['iid'] = $iid;
+			$ctl[$cnt]['unseen'] = $rec['_unseen'];
 
 			// should we notify?
 			if ($rec['_notify'])
@@ -606,7 +557,7 @@ class identity_switch extends identity_switch_cfg
 			$cnt++;
 		}
 
-		$rc->output->command('plugin.identity_switch_notify', $ctl);
+		$rc->output->command('plugin.identity_switch_update_unseen', $ctl);
 	}
 
 }

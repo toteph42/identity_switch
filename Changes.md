@@ -1,5 +1,15 @@
 # Changelog identity switch plugin
 
+## Release 3.0.4
+
+* Allow empty isw_labels
+* Fixed some array parsing error 
+* Support for multidimensional array
+* Switch to Ajax call for repainting identity list
+* Checked locking of settings
+* Dropdown list handling rewritten
+* Fixed default_iid bug
+
 ## Release 3.0.3
 
 * Bug fixed parsing of array preferences
@@ -13,12 +23,12 @@
 
 ## Release 3.0.1
 
-* Don't show passwords
+* Replace passwords with dummy characters
  
 ## Release 3.0.0
 
 * Plugin rewritten.
-* Oauth interface prepared.
+* Oauth login prepared.
 
 ## Release 2.0.24
 

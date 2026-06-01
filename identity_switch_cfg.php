@@ -50,9 +50,6 @@ class identity_switch_cfg extends identity_switch_prefs
 					unset(self::$config[$nam][$k]);
 		}
 
-		// set no identity
-		self::set('cfg', 'iid',  0);
-
 		// set export file name
 		self::set('cfg', 'export', $c = $rc->config->get('temp_dir', sys_get_temp_dir()).'/isw_out.'.session_id());
 
@@ -92,7 +89,7 @@ class identity_switch_cfg extends identity_switch_prefs
 			$r   = $rc->user->get_identity();
 			$iid = (int)$r['identity_id'];
 			self::set('cfg', 'iid', $iid);											// save active identity id
-			self::set('cfg', 'default', $iid);										// save default identity
+			self::set('cfg', 'default_iid', $iid);									// save default identity
 			self::set('cfg', 'language', $rc->config->get('language'));				// save language
 
 			// set the proper default user data
@@ -115,7 +112,7 @@ class identity_switch_cfg extends identity_switch_prefs
 			$r 	 = $rc->db->fetch_assoc($r);
 
 			// load RoudCube user preferences
-			self::load_cfg($iid, $r['email']);
+			self::load_cfg($iid, (string)$r['email']);
 		}
 
 		self::set($iid, '_unseen', 			0);										// # of unseen messages
@@ -148,6 +145,8 @@ class identity_switch_cfg extends identity_switch_prefs
 		}
 		self::write_log(__FILE__, __LINE__, 'Applying predefined configuration for '.$iid.' - '.$txt.' match.', true);
 
+		$did = self::get('cfg', 'default_iid');
+
 		foreach ($cfg as $k => $v)
 		{
 			// do not swap temporary configuration parameters
@@ -160,7 +159,22 @@ class identity_switch_cfg extends identity_switch_prefs
 
 			// load RoundCube default?
 			if ($v == 'default')
-				$v = $rc->config->get(substr($k, 4));
+			{
+				switch ($k)
+				{
+				case 'isw_imap_host':
+				case 'isw_imap_ssl':
+				case 'isw_imap_port':
+				case 'isw_imap_user':
+				case 'isw_imap_pass':
+					$v = self::get($did, $k);
+					break;
+
+				default:
+					$v = $rc->config->get(substr($k, 4));
+					break;
+				}
+			}
 
 			// check for special configuration paraneters
 			if ($k == 'smtp_pass' && $v == '%p')

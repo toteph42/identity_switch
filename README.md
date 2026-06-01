@@ -35,8 +35,7 @@ Please note:
 * All passwords were show as ●●●●●●●●. If you enter a new password, it will be stored encrypted.
 * If you set the `cfg_hide_pref` to `true`, then all preferences will be hidden. 
 * Most of the settings were defined in `default.inc.php`. For a descption about allowed content please refer to`config/default.inc.php`. 
-* You may change any of the given preferences or you may also add new user preferences for this identity.
-* All preferences will override global **RoundCube** settings.
+* All preferences will override **RoundCube** settings for current identity. The accociated settings differs in name only by the `isw_` prefix used by plugin.
 
 ### Configuration ###
 
@@ -46,7 +45,7 @@ If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, 
 
 ### Locking configuration ###
 
-You may use the `dont_override` configuration option in your **RoundCube** configuration file `config/config.inc.php` to lock most settings from being overriden. This plugins supports all settings which can be locked in **RoundCube**.
+You may use the `dont_override` configuration option in your **RoundCube** configuration file `config/config.inc.php` to lock settings from being overriden. Plugin connection settings cannot be locked.
 
 ### Performance ###
 
@@ -54,9 +53,11 @@ New mail checking is performed in background asynchronously. This has the effect
 
 If you've select **Check all folders**, this has a huge impact on the time new-mail checking need to collect information. If you have hundreds of folders in your mail box, each of the boxes will be checked for new mails.
 
+Depending on the workload on your host, it migth happen, that the menue isn't opened as quick as expected. This depend on how **RoundCube** is able to handle the synchroneous Ajax requests.
+
 ### Version compatibility ###
 
-Versions 3.x - for **RoundCube** v1.6.x requires PHP version >= 8.0.0.
+Versions 3.x - for **RoundCube** v1.6.x and c1.7.x requires PHP version >= 8.0.0.
 
 ### Limitations ###
 
@@ -68,7 +69,7 @@ This plugin is released under the [GNU General Public License v3.0](./LICENSE).
 
 ### Debugging ###
 
-If you encounter problems with plugin, take a look at the option available in `default.inc.php`. 
+If you encounter problems with plugin, take a look at the debug options available in `default.inc.php`. 
 
 If you encounter **connection problems**, it is a good idea to enable **RoundCube** available debugging options.
 

@@ -6,14 +6,12 @@
  */
 
 $(function() {
-	$sw = $('#identity_switch_menu');
-	
-	// Issue #38
+	var $sw = $('#identity_switch_menu');
+	var isOk = false;
+
 	if ($sw.length == 0)
 		return;
 	
-	isOk = false;
-
 	switch (rcmail.env['skin']) {
 	case 'larry':
 		isOk = identity_switch_addCbLarry($sw);
@@ -35,7 +33,7 @@ $(function() {
 		$sw.show();
 });
 
-// Catch all mouse clicks
+// catch all mouse clicks
 $(document).click(function(event) { 
     
     // Check for left button
@@ -47,17 +45,19 @@ $(document).click(function(event) {
     }
 });
 
-// Plugin initialization
-function identity_switch_init() {
-    rcmail.addEventListener('plugin.identity_switch_notify', identity_switch_notify)
-    	  .addEventListener('init', function() {
-            // Bind to messages list select event, so favicon will be reverted on message preview too
-            if (rcmail.message_list)
-                rcmail.message_list.addEventListener('select', identity_switch_stop_notify);
-    });
+/*
+// plugin initialization
+if (window.rcmail) {
+    rcmail.addEventListener('init', function () {
+		rcmail.addEventListener('plugin.identity_switch_update_unseen', identity_switch_update_unseen);
+		// bind to messages list select event, so favicon will be reverted on message preview too
+		if (rcmail.message_list)
+			rcmail.message_list.addEventListener('select', identity_switch_update_unseen);
+	});
 }
+*/
 
-// Set menu position
+// set menu position
 function identity_switch_addCbLarry($sw) {
 	var $truName = $('.topright .username');
 	
@@ -79,7 +79,7 @@ function identity_switch_addCbLarry($sw) {
 	return false;
 }
 
-// Set menu position
+// set menu position
 function identity_switch_addCbClassic($sw) {
 	var $taskBar = $('#taskbar');
 	
@@ -98,7 +98,7 @@ function identity_switch_addCbClassic($sw) {
 	return false;
 }
 
-// Set menu position
+// set menu position
 function identity_switch_addCbElastic($sw) {
     var $taskBar = $('.header-title.username');
     
@@ -133,25 +133,17 @@ function identity_switch_addCbElastic($sw) {
     return false;
 }
 
-// Change userid in composer window to select proper identity
+// change userid in composer window to select proper identity
 function identity_switch_fixIdent(iid) {
 	if (parseInt(iid) > 0)
 		$("#_from").val(iid);
 }
 
-// Open/close menu
+// open/close menu
 function identity_switch_toggle_menu(offset) {
 	var d = $('#identity_switch_dropdown'); 
 
 	if (d.is(':hidden')) {
-		// reload window to show new mail counter in menu
-		d.load(location.href + ' #identity_switch_dropdown > *', function( response, status, xhr ) {
-			// special hack for ROundCube <= 1.7
-			if (response.indexOf('DOCTYPE') == -1 ) {
-				response = JSON.parse(response);
-			 	d.append(response['identity_switch_dropdown']);
-			}
-		});
 		d.show();
 		$('#messagelist-fixedcopy').css('z-index', 'auto');
 		
@@ -161,26 +153,27 @@ function identity_switch_toggle_menu(offset) {
 		d.hide();
 }
 
-// Switch identity
+// switch identity
 function identity_switch_run(iid) {
     rcmail.env.unread_counts = {};
 	rcmail.http_post('plugin.identity_switch_do', { 'identity_switch_iid': iid });
 }
 
-// Perform notification
-function identity_switch_notify(ctl) {
-
+// perform updates on unseen counter (and notify)
+function identity_switch_update_unseen( ctl) {
 	var autoplay = decodeURI(ctl[0].autoplay);
 	var notification = decodeURI(ctl[0].notification);
 	var title = decodeURI(ctl[0].title);
 	
- 	for (var i = 1; i < ctl.length; i++) {
-		var e = $('#identity_switch_opt_' + ctl[i].iid);
+	for (var i = 1; i < ctl.length; i++) {
+		var e = $('#identity_switch_unseen_' + ctl[i].iid);
+		
 		if (ctl[i].unseen == '0')
 			e.text('');
 		else
 			e.text(ctl[i].unseen);
 
+		// check for notification
 		if (ctl[i].basic !== undefined)
 			identity_switch_basic();
 		if (ctl[i].desktop !== undefined) 
@@ -190,17 +183,17 @@ function identity_switch_notify(ctl) {
 	}
 }
 
-// Stop notification
+// stop notification
 function identity_switch_stop_notify(prop)
 {
-    // Revert original favicon
+    // revert original favicon
     if (rcmail.env.favicon_href && rcmail.env.favicon_changed && (!prop || prop.action != 'check-recent')) {
         $('<link rel="shortcut icon" href="'+rcmail.env.favicon_href+'"/>').replaceAll('link[rel="shortcut icon"]');
         rcmail.env.favicon_changed = 0;
     }
 }
 
-// Browser notification: window.focus and favicon change
+// browser notification: window.focus and favicon change
 function identity_switch_basic()
 {
     var w = rcmail.is_framed() ? window.parent : window;
@@ -208,7 +201,7 @@ function identity_switch_basic()
 
     var src = rcmail.assets_path('plugins/identity_switch/assets');
 
-    // We cannot simply change a href attribute, we must to replace the link element (at least in FF)
+    // we cannot simply change a href attribute, we must to replace the link element (at least in FF)
 	var link = $('<link rel="shortcut icon">').attr('href', src + '/alert.ico');
  	var olink = $('link[rel="shortcut icon"]', w.document);
     if (!rcmail.env.favicon_href)
@@ -218,7 +211,7 @@ function identity_switch_basic()
     link.replaceAll(olink);
 }
 
-// Desktop notification
+// desktop notification
 // - Require window.Notification API support (Chrome 22+ or Firefox 22+)
 function identity_switch_desktop(title, msg, timeout, errmsg)
 {
@@ -238,7 +231,7 @@ function identity_switch_desktop(title, msg, timeout, errmsg)
 	setTimeout(function() { popup.close(); }, timeout * 1000);
 }
 
-// Sound notification
+// sound notification
 function identity_switch_sound(errmsg) {
     var src = rcmail.assets_path('plugins/identity_switch/assets/alert');
 
