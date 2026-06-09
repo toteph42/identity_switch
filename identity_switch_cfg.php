@@ -50,36 +50,29 @@ class identity_switch_cfg extends identity_switch_prefs
 					unset(self::$config[$nam][$k]);
 		}
 
-		// set export file name
-		self::set('cfg', 'export', $c = $rc->config->get('temp_dir', sys_get_temp_dir()).'/isw_out.'.session_id());
-
-		// set data file name
-		self::set('cfg', 'import',  str_replace('_out', '_in', $c));
-
-		// set file pointer
-		self::set('cfg', 'fp', 0);
-
 		// load identity parameter for default identity
-		self::get_cfg(0);
+		$r = $rc->user->get_identity();
+		self::get_cfg(0, $r['email']);
 
 		// load all other known identities
 		$iid = self::get('cfg', 'iid');
-		$sql = 'SELECT `identity_id`'.
+		$sql = 'SELECT `identity_id`, `email`'.
 			   ' FROM '.$rc->db->table_name('identities', true).
-			   ' WHERE `user_id` = ?';
+			   ' WHERE `user_id` = ? AND `del` = 0';
 		$q   = $rc->db->query($sql, $rc->user->ID);
 		while ($r = $rc->db->fetch_assoc($q))
 			// skip default identity
 			if ((int)$r['identity_id'] != $iid)
-				self::get_cfg((int)$r['identity_id']);
+				self::get_cfg((int)$r['identity_id'], $r['email']);
 	}
 
 	/**
 	 * 	Get configuration for identity
 	 *
 	 * 	@param int $iid
+	 * 	@param string $email
 	 */
-	protected function get_cfg(int $iid): void {
+	protected function get_cfg(int $iid, string $email): void {
 
 		$rc = rcmail::get_instance();
 
@@ -88,9 +81,11 @@ class identity_switch_cfg extends identity_switch_prefs
 		{
 			$r   = $rc->user->get_identity();
 			$iid = (int)$r['identity_id'];
-			self::set('cfg', 'iid', $iid);											// save active identity id
-			self::set('cfg', 'default_iid', $iid);									// save default identity
-			self::set('cfg', 'language', $rc->config->get('language'));				// save language
+			self::set('cfg', 'iid', $iid);							// save active identity id
+			self::set('cfg', 'default_iid', $iid);					// save default identity
+			self::set('cfg', 'language', $_SESSION['language']);	// save language
+			self::set('cfg', 'lock', false);						// table lock status
+			self::set('cfg', 'init', false);						// initial new mail check performed
 
 			// set the proper default user data
 			self::set($iid, 'isw_label', $r['name']);
@@ -99,25 +94,14 @@ class identity_switch_cfg extends identity_switch_prefs
 			self::set($iid, 'isw_imap_host', $_SESSION['storage_host']);
 			self::set($iid, 'isw_imap_port', $_SESSION['storage_port']);
 			self::set($iid, 'isw_imap_ssl', $_SESSION['storage_ssl']);
-
-			// load preferences
-			self::load_cfg((int)$iid, $r['email']);
-
-		} else
-		{
-			$sql = 'SELECT `email` FROM '.
-				   $rc->db->table_name('identities', true).
-				   ' WHERE `identity_id` = ?';
-			$r 	 = $rc->db->query($sql, $iid);
-			$r 	 = $rc->db->fetch_assoc($r);
-
-			// load RoudCube user preferences
-			self::load_cfg($iid, (string)$r['email']);
 		}
 
-		self::set($iid, '_unseen', 			0);										// # of unseen messages
-		self::set($iid, '_checked_last',	0);										// last time checked
-		self::set($iid, '_notify',			false);									// notify user flag
+		// load preferences
+		self::load_cfg($iid, $email);
+
+		self::set($iid, '_unseen', 0);								// # of unseen messages
+		self::set($iid, '_notify', false);							// notify user flag
+		self::set($iid, '_checked', 0);								// last time check for new mail
 	}
 
 	/**
@@ -143,7 +127,7 @@ class identity_switch_cfg extends identity_switch_prefs
 			$cfg = array_merge($cfg, self::$config[$dom]);
 			$txt = 'domain';
 		}
-		self::write_log(__FILE__, __LINE__, 'Applying predefined configuration for '.$iid.' - '.$txt.' match.', true);
+		self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Applying predefined configuration - '.$txt.' match.', true);
 
 		$did = self::get('cfg', 'default_iid');
 
@@ -208,10 +192,13 @@ class identity_switch_cfg extends identity_switch_prefs
 		$q   = $rc->db->query($sql, $iid);
 		if (($r = $rc->db->fetch_assoc($q)) && isset($r['identity_switch_prefs']))
 		{
-			foreach ((array)json_decode($r['identity_switch_prefs']) as $k => $v)
-				self::set($iid, $k, is_object($v) ? (array)$v : $v);
-
-			self::write_log(__FILE__, __LINE__, 'Updating configuration for '.$iid.' with saved data.', true);
+			$prefs = (array)json_decode($r['identity_switch_prefs']);
+			if (isset($prefs['isw_label']) && $prefs['isw_label'] <> '')
+			{
+				foreach ($prefs as $k => $v)
+					self::set($iid, $k, is_object($v) ? (array)$v : $v);
+				self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Updating configuration with saved data', true);
+			}
 		}
 	}
 
@@ -236,7 +223,7 @@ class identity_switch_cfg extends identity_switch_prefs
 		$v;
 		$q   = $rc->db->query($sql, json_encode($prefs), $iid);
 		if ($rc->db->affected_rows($q) === false)
-			$this->write_log(__FILE__, __LINE__, 'Error saving data for "'.$iid.'"');
+			$this->write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Error saving data');
 	}
 
 	/**
@@ -248,6 +235,10 @@ class identity_switch_cfg extends identity_switch_prefs
 	 */
 	protected function get(string|int|null $sect = null, string|int|null $var = null): mixed
 	{
+		// check locking status
+		while (isset($_SESSION[self::TABLE]['cfg']['lock']) && $_SESSION[self::TABLE]['cfg']['lock'])
+			usleep(10);
+
 		// get whole table?
 		if (!$sect && !$var)
 		{
@@ -278,10 +269,15 @@ class identity_switch_cfg extends identity_switch_prefs
 	 */
 	protected function set(string|int $sect, array|string|int $var, mixed $val = null, mixed $default = null): void
 	{
-
 		// table defied?
 		if (!isset($_SESSION[self::TABLE]))
 			$_SESSION[self::TABLE] = [];
+
+		// check locking status
+		if (isset($_SESSION[self::TABLE]['cfg']['lock']))
+			while ($_SESSION[self::TABLE]['cfg']['lock'])
+				usleep(10);
+		$_SESSION[self::TABLE]['cfg']['lock'] = true;
 
 		if (is_array($var))
 		{
@@ -291,6 +287,8 @@ class identity_switch_cfg extends identity_switch_prefs
 				$_SESSION[self::TABLE][$sect][$k] = is_null($v) ? $default : $v;
 		} else
 			$_SESSION[self::TABLE][$sect][$var] = $val;
+
+		$_SESSION[self::TABLE]['cfg']['lock'] = false;
 	}
 
 	/**
@@ -301,6 +299,10 @@ class identity_switch_cfg extends identity_switch_prefs
 	 */
 	protected function del(string|int|null $sect = null, ?string $var = null): void
 	{
+		// check locking status
+		while (isset($_SESSION[self::TABLE]['cfg']['lock']) && $_SESSION[self::TABLE]['cfg']['lock'])
+			usleep(10);
+
 		if (!$sect && !$var)
 			unset($_SESSION[self::TABLE]);
 

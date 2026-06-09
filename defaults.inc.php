@@ -18,18 +18,13 @@ $config['identity_switch.config'] = [
 
 		// General configuration parameters which will be handled by plugin
 
-		// Specify number of microseconds between each new mail check.
-		// Default is 0 micoseconds.
-		// If value is greater than 1000000 (1 second) delay time is rounded to seconds.
-		'cfg_delay'					=> 0,
-
 		// Specify no. of retries for reading data from mail server.
-		// Default is 10 times.
-		'cfg_retries' 				=> 10,
+		// Default is 5 times.
+		'cfg_retries' 				=> 5,
 
-		// Max. number of seconds to wait for response from script identity_switch_newmails.php
-		// Defaults to 60 seconds
-		'cfg_wait' 					=> 60,
+		// Specify number of microseconds between each new mail check.
+		// Default is 333 micoseconds.
+		'cfg_delay'					=> 333,
 
 		// Dropdown selection line size.
 		// Defaults to 34px
@@ -44,6 +39,11 @@ $config['identity_switch.config'] = [
 		// Hide user preference window when editing an identity
 		'cfg_hide_prefs'			=> false,
 
+		// debug IMAP connections for all identities
+		'cfg_imap_debug'			=> false,
+		// debug SMTP connections for all identities - not supported on idenity level
+		// 'cfg_smtp_debug'			=> false,
+
 		// ------------------------------------------------------------------------------------------------------
 
 		// Default identity label name
@@ -51,10 +51,11 @@ $config['identity_switch.config'] = [
 
 		// Some new notification handling settings introduced by plugin
 
-		// resh´fresh interval
+		// refresh interval
 		'isw_refresh_interval'		=> 'default',
 		// check all folders
 		'isw_check_all_folders' 	=> 'default',
+
 		// Basic notification
 		'isw_notification_basic' 	=> false,
 		// Desktop notification
@@ -82,8 +83,9 @@ $config['identity_switch.config'] = [
 		// 'isw_imap_port'			=> '',
 		'isw_imap_user' 			=> 'default',
 		'isw_imap_pass' 			=> 'default',
+		'isw_imap_auth_pw'			=> 'default',
+		'isw_imap_auth_type'		=> 'default',
 		'isw_imap_skip_deleted'		=> 'default',
-		'isw_imap_debug'			=> 'default',
 		'isw_imap_force_caps'		=> 'default',
 		'isw_imap_disabled_caps'	=> 'default',
 		'isw_imap_timeout'			=> 'default',
@@ -95,7 +97,6 @@ $config['identity_switch.config'] = [
 		'isw_imap_attempt'			=> 1,
 		'isw_imap_retry'			=> false,
 		'isw_imap_delimiter'		=> 'default',
-		'isw_imap_debug'			=> 'default',
 
 		// Some SMTP settings used during sending e-mail initialization
 

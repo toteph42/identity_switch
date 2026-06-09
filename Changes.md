@@ -1,5 +1,13 @@
 # Changelog identity switch plugin
 
+## Release 3.0.5
+
+* Handling of '%p' and '%u' modified
+* isw_imap_debug and isw_smtp_debug moved to global config
+* Fixed bug when saving preferences in mail preference view
+* Fixed some performance problems
+* Moved new mail check from remote procedure calls (RPC) to ajax
+
 ## Release 3.0.4
 
 * Allow empty isw_labels

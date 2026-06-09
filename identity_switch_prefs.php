@@ -12,7 +12,7 @@ class identity_switch_prefs extends rcube_plugin
 {
 
 	/*
-	 * 	Test cases
+	 * 	Test cases for input parser
 	 *
 
 	 	Xbool = true;
@@ -195,21 +195,12 @@ class identity_switch_prefs extends rcube_plugin
 	function save_isw_prefs(array $args): array
 	{
 		// saving identity data
-		$iid    = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
-		$prefs  = identity_switch_cfg::get($iid);
-		$nprefs = [];
+		$iid   = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
+		$prefs = identity_switch_cfg::get($iid);
+		$passw = [ $prefs['isw_imap_pass'], $prefs['isw_smtp_pass'] ];
 
 		// get list of locked preferences
 		$no_override = rcmail::get_instance()->config->get('dont_override');
-
-		// delete all non-internal preferences
-		if (is_array($prefs))
-		{
-			foreach ($prefs as $k => $v)
-				if (substr($k, 0, 1) == '_')
-					$nprefs[$k] = $prefs[$k];
-		} else
-			$prefs = [];
 
 		if (isset($args['prefs']))
 		{
@@ -218,7 +209,7 @@ class identity_switch_prefs extends rcube_plugin
 			case 'general':
 				$k = 'isw_refresh_interval';
 				if (!isset($no_override[$k]))
-					$nprefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
+					$prefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
 				break;
 
 			case 'mailbox':
@@ -229,8 +220,8 @@ class identity_switch_prefs extends rcube_plugin
 						   'isw_notification_sound' ] as $k)
 				{
 					$v = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
-					if (isset($no_override[$k]))
-						$nprefs[$k] = is_null($v) ? false : true;
+					if (!isset($no_override[$k]))
+						$prefs[$k] = is_null($v) ? false : true;
 				}
 
 			default:
@@ -238,26 +229,26 @@ class identity_switch_prefs extends rcube_plugin
 			}
 		} else
 		{
-			$nprefs['isw_label'] = rcube_utils::get_input_value('_isw_label', rcube_utils::INPUT_POST);
+			$prefs['isw_label'] = rcube_utils::get_input_value('_isw_label', rcube_utils::INPUT_POST);
 
 			if ($v = rcube_utils::get_input_value('_isw_prefs', rcube_utils::INPUT_POST))
 				foreach (explode("\n", $v) as $r)
-					self::get_val($nprefs, $r);
+					self::get_val($prefs, $r);
 		}
 
 		// special password check
-		foreach ($nprefs as $k => $v)
+		foreach ($prefs as $k => $v)
 			if (strpos($k, 'pass') !== false)
 			{
 				// swap old password?
 				if ($v == '●●●●●●●●')
-					$nprefs[$k] = $prefs[$k];
+					$prefs[$k] = $passw[$k == 'isw_imap_pass' ? 0 : 1];
 			}
 
 		// replace preferences
 		identity_switch_cfg::del($iid);
-		ksort($nprefs);
-		identity_switch_cfg::set($iid, $nprefs);
+		ksort($prefs);
+		identity_switch_cfg::set($iid, $prefs);
 
 		// save user preferences
 		identity_switch_cfg::save_cfg($iid);
