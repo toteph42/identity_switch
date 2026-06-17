@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 3.0.6
+
+* Fixed minor bug in "unseen update counter"
+* Enhanced "unseen update counter on deletion of message
+
 ## Release 3.0.5
 
 * Handling of '%p' and '%u' modified

@@ -313,9 +313,43 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function check_flag($args) {
 
-		// only refresh?
-		// single mail marked as read/unread
-		if (!isset($args['action']) || $args['action'] != 'mark')
+		// action available?
+		if (!isset($args['action']))
+			return $args;
+
+		// move to trash?
+		if ($args['action'] == 'move')
+		{
+			$iid = self::get('cfg', 'iid');
+			$rc  = rcmail::get_instance();
+			$box = $rc->config->get('trash_mbox');
+
+			// is it trash box
+			if ($box != rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST))
+				return $args;
+
+			$msg = new rcube_message(rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST),
+									 rcube_utils::get_input_value('_mbox', rcube_utils::INPUT_POST));
+
+            // message found?
+            if (!empty($msg->headers))
+            {
+				self::set($iid, '_old', self::get($iid, '_unseen'));
+				$unseen = $_SESSION['unseen_count']['INBOX'];
+				// message not seen yet?
+				if (!isset($msg->headers->flags['SEEN']))
+				{
+					$unseen--;
+				    self::set($iid, '_unseen',  $unseen);
+					self::swap($iid);
+				}
+            }
+
+			return $args;
+		}
+
+		// mail marked as read/unread
+		if ($args['action'] != 'mark')
 			return $args;
 
 		$iid 	= self::get('cfg', 'iid');
@@ -348,7 +382,7 @@ class identity_switch extends identity_switch_cfg
 
 		self::set($iid, '_old', self::get($iid, '_unseen'));
 	    self::set($iid, '_unseen', $unseen);
-		self::notify($iid);
+		self::swap($iid);
 
 		return $args;
 	}
@@ -434,14 +468,15 @@ class identity_switch extends identity_switch_cfg
 
 	    $storage->close();
 
-	    if ($unseen > $rec['_unseen'])
+	    if ($unseen <> $rec['_unseen'])
 	    {
-			self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': '.($unseen - $rec['_unseen']).
-							' new mails found', true);
+			self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': '.$unseen.' new mails found'.
+							' (old value: '.$rec['_unseen'].')', true);
 			self::set($iid, '_old', $rec['_unseen']);
+			if ($unseen > $rec['_unseen'])
+		    	self::set($iid, '_notify', true);
 			self::set($iid, '_unseen', $unseen);
-	    	self::set($iid, '_notify', true);
-		    self::notify($iid);
+		    self::swap($iid);
 	    }
 	}
 
@@ -450,7 +485,7 @@ class identity_switch extends identity_switch_cfg
 	 *
 	 * 	@param 	$iid int
 	 */
-	function notify(int $iid)
+	function swap(int $iid)
 	{
 		$rc = rcmail::get_instance();
 
