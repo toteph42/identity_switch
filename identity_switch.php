@@ -328,22 +328,24 @@ class identity_switch extends identity_switch_cfg
 			if ($box != rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST))
 				return $args;
 
-			$msg = new rcube_message(rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST),
-									 rcube_utils::get_input_value('_mbox', rcube_utils::INPUT_POST));
+			// get current unseen counter
+			$unseen = $_SESSION['unseen_count']['INBOX'];
 
-            // message found?
-            if (!empty($msg->headers))
-            {
-				self::set($iid, '_old', self::get($iid, '_unseen'));
-				$unseen = $_SESSION['unseen_count']['INBOX'];
-				// message not seen yet?
-				if (!isset($msg->headers->flags['SEEN']))
-				{
+			// check message
+			foreach (explode(',', rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST)) as $uid)
+			{
+				$msg = new rcube_message($uid, rcube_utils::get_input_value('_mbox', rcube_utils::INPUT_POST));
+
+	            // message found?
+    	        if (!empty($msg->headers) && !isset($msg->headers->flags['SEEN']))
 					$unseen--;
-				    self::set($iid, '_unseen',  $unseen);
-					self::swap($iid);
-				}
             }
+			if (($old = self::get($iid, '_unseen')) > $unseen)
+			{
+				self::set($iid, '_old', $old);
+			    self::set($iid, '_unseen',  $unseen);
+				self::swap($iid);
+			}
 
 			return $args;
 		}

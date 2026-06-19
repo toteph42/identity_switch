@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 3.0.7
+
+* Fixed bug when deleting multiple mails
+
 ## Release 3.0.6
 
 * Fixed minor bug in "unseen update counter"
