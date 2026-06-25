@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 3.0.8
+
+* Fixed bug when saving refesh interval for new mail check
+* Documentation update
+
 ## Release 3.0.7
 
 * Fixed bug when deleting multiple mails

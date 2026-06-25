@@ -39,7 +39,7 @@ Please note:
 
 ### Configuration ###
 
-There is a file `default.inc.php` in the plugin directory available. This file can be used to specify some individual preferences. Please copy file to `config.inc.php` and change there your preferences. 
+There is a file `plugins/identity_switch/default.inc.php` in the plugin directory available. This file can be used to specify some individual preferences. Please copy file to `plugins/identity_switch/config.inc.php` and change there your preferences. 
 
 If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, `alert.ico` and `alert.gif` in sub-directory `assets`.
 

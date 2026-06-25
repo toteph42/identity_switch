@@ -209,7 +209,7 @@ class identity_switch_prefs extends rcube_plugin
 			case 'general':
 				$k = 'isw_refresh_interval';
 				if (!isset($no_override[$k]))
-					$prefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
+					$prefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST) * 60;
 				break;
 
 			case 'mailbox':
