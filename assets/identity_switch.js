@@ -214,26 +214,30 @@ $(function()
 	switch (rcmail.env['skin']) 
 	{
 	case 'larry':
-		isOk = identity_switch_addCbLarry($sw);
+		isOk = identity_switch_skinLarry($sw);
 		break;
 			
 	case 'classic':
-		isOk = identity_switch_addCbClassic($sw);
+		isOk = identity_switch_skinClassic($sw);
 		break;
 
     case 'elastic':
 	case 'hivemail':
-        isOk = identity_switch_addCbElastic($sw);
+        isOk = identity_switch_skinElastic($sw);
+		break;
     
     default:
-		break;
+		alert('identity_switch plugin: Your skin "' + rcmail.env['skin'] + '" is not supported!')
+		return;
 	}
 
 	if (isOk)
 		$sw.show();
+	else
+		alert('identity_switch plugin: Cannot show drop down menu!');
 });
 
-function identity_switch_addCbLarry($sw) 
+function identity_switch_skinLarry($sw) 
 {
 	var $truName = $('.topright .username');
 	
@@ -241,36 +245,40 @@ function identity_switch_addCbLarry($sw)
 	{
 		$sw.prependTo('#taskbar');
 		$truName.hide();
-		// moive our selection menu a bit to the right
+		
+		// move our selection menu a bit to the right
 		$('#identity_switch_menu')
 			.css('padding-top', '4px')
 			.css('padding-bottom', '4px');
 		$('#identity_switch_dropdown')
 			.css('margin-left', '-92px');
+			
 		return true;
 	}
 	return false;
 }
 
-function identity_switch_addCbClassic($sw) 
+function identity_switch_skinClassic($sw) 
 {
 	var $taskBar = $('#taskbar');
 	
 	if ($taskBar.length > 0) 
 	{
 		$taskBar.prepend($sw);
+		
 		// move our selection menu a bit to the right
 		$('#identity_switch_menu').css('left', '-10px')
 			.css('top', '-5px');
 		$('#identity_switch_dropdown')
 			.css('left', '190px')
 			.css('top', '-40px');
+			
 		return true;
 	}
 	return false;
 }
 
-function identity_switch_addCbElastic($sw) 
+function identity_switch_skinElastic($sw) 
 {
     var $taskBar = $('.header-title.username');
     
@@ -299,8 +307,10 @@ function identity_switch_addCbElastic($sw)
 		$('#identity_switch_dropdown')
 			.css('left', '9px')
 			.css('margin-top', '0');
+
        return true;
     }
+	
     return false;
 }
 

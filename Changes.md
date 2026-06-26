@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 3.0.9
+
+* Added error message when using uknown skin
+
 ## Release 3.0.8
 
 * Fixed bug when saving refesh interval for new mail check
