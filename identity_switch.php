@@ -50,6 +50,10 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function init(): void
 	{
+		// skip plugin initialization, when running in CLI environement
+		if (php_sapi_name() === 'cli')
+			return;
+
 		$rc = rcmail::get_instance();
 
 		// identity switch hooks and actions

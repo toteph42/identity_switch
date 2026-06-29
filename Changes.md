@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 3.0.10
+
+* Call as CLI catshed
+
 ## Release 3.0.9
 
 * Added error message when using uknown skin
