@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 3.0.12
+
+* Dropped some SQL scripts
+
 ## Release 3.0.11
 
 * Remove identity from drop down when deleted
