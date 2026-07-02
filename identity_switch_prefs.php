@@ -50,6 +50,7 @@ class identity_switch_prefs extends rcube_plugin
 		// preference hooks and actions
 		$this->add_hook('identity_form', 				  [ $this, 'show_isw_prefs'	]);
 		$this->add_hook('identity_update', 				  [ $this, 'save_isw_prefs'	]);
+		$this->add_hook('identity_delete', 				  [ $this, 'del_isw_prefs'	]);
 		$this->add_hook('identity_create_after',		  [ $this, 'save_isw_prefs' ]);
 		$this->add_hook('preferences_list', 			  [ $this, 'show_rc_prefs'	]);
 		$this->add_hook('preferences_save', 			  [ $this, 'save_isw_prefs' ]);
@@ -252,6 +253,26 @@ class identity_switch_prefs extends rcube_plugin
 
 		// save user preferences
 		identity_switch_cfg::save_cfg($iid);
+
+		return $args;
+	}
+
+	/**
+	 * 	Delete identity
+	 *
+	 * 	@param array $args
+	 * 	@return array
+	 */
+	function del_isw_prefs(array $args): array
+	{
+		// get identity
+		$iid = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
+
+		// delete identity from cache
+		identity_switch_cfg::del($iid);
+
+		// rebuild dropdown
+		identity_switch::$_menu = false;
 
 		return $args;
 	}

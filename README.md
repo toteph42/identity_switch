@@ -57,11 +57,11 @@ Depending on the workload on your host, it migth happen, that the menue isn't op
 
 ### Version compatibility ###
 
-Versions 3.x - for **RoundCube** v1.6.x and c1.7.x requires PHP version >= 8.0.0.
+Versions 3.x - for **RoundCube** v1.6.x and 1.7.x requires PHP version >= 8.0.0.
 
 ### Limitations ###
 
-This plugin only supports `Classic`, `Elatic`, `Larry` and `Hivemail` skin. If you wan't to get another skin to be supoorted, then please contact me. I can add support for other skin if you buy for it.
+This plugin only supports `Elastic` skin. According to **RoundCube** team `Larry` and `Classic` skin is not longer supported. If you wan't to get another skin to be supoorted, then please contact me. I can add support for other skins if you pay for it. Or you modify plugin according to your needs and send me your changes.
 
 ### License ###
 

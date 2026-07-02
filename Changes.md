@@ -1,8 +1,16 @@
 # Changelog identity switch plugin
 
+## Release 3.0.11
+
+* Remove identity from drop down when deleted
+* Updated flag checking
+* Support for Larry and Classic skin removed
+* Slicing of drop down menu moved to PHP
+* Bug fix for "never check mail" 
+
 ## Release 3.0.10
 
-* Call as CLI catshed
+* Catch ing call as CLI -> no initialization
 
 ## Release 3.0.9
 

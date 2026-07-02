@@ -40,7 +40,7 @@ class identity_switch extends identity_switch_cfg
     public $task = '?(?!login).*';
 
     // true= menu has been constructed
-    static private $_menu = false;
+    static public $_menu = false;
 
 	/**
 	 * 	Initialize Plugin
@@ -128,6 +128,13 @@ class identity_switch extends identity_switch_cfg
 		// we're initialized
 		self::$_menu = true;
 
+		// check skin
+		if (($skin = $rc->config->get('skin')) != 'elastic')
+		{
+			self::write_log(__FILE__, __LINE__, 'Skin "'.$skin.'" is not supported');
+			return $args;
+		}
+
 		$acc = [];
 		$ctl = [];
 		$n   = 0;
@@ -136,9 +143,10 @@ class identity_switch extends identity_switch_cfg
 			if (!is_numeric($k) || $v['isw_label'] == '')
 				continue;
 			$acc[rcube::Q($v['isw_label'])] = [ 'iid' => $k, 'unseen' => $v['_unseen'] ];
-			$ctl[$n]['iid'] = $k;
 			// compute delay timer
-			$wait = $v['isw_refresh_interval'];
+			if (!($wait = $v['isw_refresh_interval']))
+				continue;
+			$ctl[$n]['iid'] = $k;
 			if (time() > $v['_checked'])
 				self::set($k, '_checked', time() + $wait);
 			else
@@ -154,7 +162,8 @@ class identity_switch extends identity_switch_cfg
 		$ctl[0]['logging'] = self::get('cfg', 'cfg_logging');
 
 		// start checking for new mails
-		$rc->output->command('plugin.identity_switch_newmail', $ctl);
+		if ($n)
+			$rc->output->command('plugin.identity_switch_newmail', $ctl);
 
 		// build menu
 		$this->add_texts('localization');
@@ -179,18 +188,33 @@ class identity_switch extends identity_switch_cfg
 		// render UI if user has identities to switch to
 		if (count($acc) > 1)
 		{
-			$div = '<div id="identity_switch_menu"'.
-				   ' class="form-control"'.
-				   ' onclick="identity_switch_toggle_menu('.$off * $size.')">'.
-				   rcube::Q(self::get($iid, 'isw_label')).
-				   '<div id="identity_switch_dropdown" style="line-height:'.$size.'px"><ul>';
+			// slicing in drop down box
+			if (!($p1 = strpos($args['content'], '<span class="header-title username">')))
+			{
+				self::write_log(__FILE__, __LINE__, 'Cannot insert drop down box - skipping');
+				return $args;
+			}
+			$div   = '<div id="identity_switch_menu"'.
+				     ' class="form-control"'.
+				     ' onclick="identity_switch_toggle_menu('.$off * $size.')"'.
+				     ' style="background-color: transparent; height: 30px;width: 180px; padding-left: 10px;">'.
+				     rcube::Q(self::get($iid, 'isw_label'));
+
+			$div .= '<div id="identity_switch_dropdown" style="line-height:'.$size.'px;'.
+					' left: 0; margin-top: 0;">';
+
+			$div .= '<ul>';
 			foreach ($acc as $name => $r)
 				$div .= '<li onclick="identity_switch_run('.$r['iid'].');"><a href="#">'.$name.
 					  	'<span id="identity_switch_unseen_'.$r['iid'].'"'.
 					  	' class="unseen" style="top:'.($size >= 24 ? ((34 - $size)/2).'px':
 					  	' 0px;line-height:initial;font-size:x-small').'">'.
-				  	   	($r['iid'] == $iid ? "" : ($r['unseen'] > 0 ? $r['unseen'] : '')).'</span></a></li>';
-			rcmail::get_instance()->output->add_footer($div.'</ul></div></div>');
+				  	   	($r['iid'] == $iid ? "" : ($r['unseen'] > 0 ? $r['unseen'] : '')).'</span></a></li>'."\n";
+
+			$div .= '</ul></div></div>'."\n";
+
+			$p2 = strpos($args['content'], '</span>', $p1 + 36) + 7;
+			$args['content'] = substr($args['content'], 0, $p1).$div.substr($args['content'], $p2);
 		}
 
 		return $args;
@@ -321,21 +345,31 @@ class identity_switch extends identity_switch_cfg
 		if (!isset($args['action']))
 			return $args;
 
-		// move to trash?
-		if ($args['action'] == 'move')
+		$iid = self::get('cfg', 'iid');
+
+		// check all folders?
+		if (!isset($_SESSION['mbox']) ||
+		   ($_SESSION['mbox'] != 'INBOX' && self::get($iid, 'isw_check_all_folders') == '0'))
+			return $args;
+
+		// get current unseen counter
+		if (!isset($_SESSION['unseen_count']))
+			return $args;
+
+		$unseen = $_SESSION['unseen_count'][$_SESSION['mbox']];
+
+		switch ($args['action'])
 		{
-			$iid = self::get('cfg', 'iid');
+		// move to trash?
+		case 'move':
 			$rc  = rcmail::get_instance();
 			$box = $rc->config->get('trash_mbox');
 
-			// is it trash box
+			// is it trash box?
 			if ($box != rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST))
 				return $args;
 
-			// get current unseen counter
-			$unseen = $_SESSION['unseen_count']['INBOX'];
-
-			// check message
+			// check message flag
 			foreach (explode(',', rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST)) as $uid)
 			{
 				$msg = new rcube_message($uid, rcube_utils::get_input_value('_mbox', rcube_utils::INPUT_POST));
@@ -344,51 +378,43 @@ class identity_switch extends identity_switch_cfg
     	        if (!empty($msg->headers) && !isset($msg->headers->flags['SEEN']))
 					$unseen--;
             }
-			if (($old = self::get($iid, '_unseen')) > $unseen)
-			{
-				self::set($iid, '_old', $old);
-			    self::set($iid, '_unseen',  $unseen);
-				self::swap($iid);
-			}
-
-			return $args;
-		}
-
-		// mail marked as read/unread
-		if ($args['action'] != 'mark')
-			return $args;
-
-		$iid 	= self::get('cfg', 'iid');
-		$unseen = $_SESSION['unseen_count']['INBOX'];
-
-		// check all folders
-		if (self::get($iid, 'isw_check_all_folders') == '1' && isset($_SESSION['unseen_count']))
-		{
-			// we hope RoundCube has set session variable
-			foreach ($_SESSION['unseen_count'] as $k => $v)
-				if ($k != 'INBOX')
-					$unseen += $v;
-		}
-
-		switch (rcube_utils::get_input_string('_flag', rcube_utils::INPUT_POST))
-		{
-		case 'read':
-			$unseen--;
-			self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Mail flag "unread" deleted', true);
 			break;
 
-		case 'unread':
-			$unseen++;
-			self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Mail flag "unread" set', true);
+		// composing message makes mail unread
+		case 'compose':
+			$unseen--;
+			break;
+
+		// check flag
+		case 'mark':
+			switch (rcube_utils::get_input_string('_flag', rcube_utils::INPUT_POST))
+			{
+			case 'read':
+				if ($unseen > 0)
+					$unseen--;
+				self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Mail flag "unread" deleted', true);
+				break;
+
+			case 'unread':
+				$unseen++;
+				self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Mail flag "unread" set', true);
+				break;
+
+			default:
+				return $args;
+			}
 			break;
 
 		default:
-			breaK;
+			return $args;
 		}
 
-		self::set($iid, '_old', self::get($iid, '_unseen'));
-	    self::set($iid, '_unseen', $unseen);
-		self::swap($iid);
+		if (($old = self::get($iid, '_unseen')) <> $unseen)
+		{
+			self::set($iid, '_old', $old);
+		    self::set($iid, '_unseen',  $unseen);
+			self::swap($iid);
+		}
 
 		return $args;
 	}
