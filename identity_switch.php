@@ -424,6 +424,16 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function switch_identity(): void
 	{
+		$rc = rcmail::get_instance();
+
+		// Reject cross-site requests: this action changes session state
+		// ($_SESSION['username']/['password']), so the request token must be
+		// validated. The plugin's own JS sends it via rcmail.http_post().
+		if (!$rc->check_request()) {
+			$rc->output->show_message('invalidrequest', 'error');
+			return;
+		}
+
         // get new identity
         $iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST);
 		// activate identity
@@ -446,6 +456,14 @@ class identity_switch extends identity_switch_cfg
 	function check_newmail()
 	{
 		$rc = rcmail::get_instance();
+
+		// Reject cross-site requests: this action switches the active identity
+		// and opens a server-side IMAP connection, so validate the request token.
+		// The plugin's own JS sends it via rcmail.http_post().
+		if (!$rc->check_request()) {
+			$rc->output->show_message('invalidrequest', 'error');
+			return;
+		}
 
 		// get iid to check
 		$iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST);
