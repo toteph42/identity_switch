@@ -14,6 +14,11 @@ class identity_switch_cfg extends identity_switch_prefs
 
 	const TABLE = 'identity_switch';				// where to store data in $_SESSION
 
+	// log levels
+	const LVL_ERROR = 0;
+	const LVL_EXEC	= 1;
+	const LVL_DEBUG	= 2;
+
 	/**
 	 * 	Initialize Plugin
 	 *
@@ -127,7 +132,8 @@ class identity_switch_cfg extends identity_switch_prefs
 			$cfg = array_merge($cfg, self::$config[$dom]);
 			$txt = 'domain';
 		}
-		self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Applying predefined configuration - '.$txt.' match.', true);
+		self::write_log(__FILE__, __LINE__, self::LVL_DEBUG,
+						sprintf('%03d', $iid).': Applying predefined configuration - '.$txt.' match.');
 
 		$did = self::get('cfg', 'default_iid');
 
@@ -197,7 +203,8 @@ class identity_switch_cfg extends identity_switch_prefs
 			{
 				foreach ($prefs as $k => $v)
 					self::set($iid, $k, is_object($v) ? (array)$v : $v);
-				self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Updating configuration with saved data', true);
+				self::write_log(__FILE__, __LINE__, self::LVL_DEBUG,
+								sprintf('%03d', $iid).': Updating configuration with saved data');
 			}
 		}
 	}
@@ -223,7 +230,8 @@ class identity_switch_cfg extends identity_switch_prefs
 		$v;
 		$q   = $rc->db->query($sql, json_encode($prefs), $iid);
 		if ($rc->db->affected_rows($q) === false)
-			$this->write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Error saving data');
+			$this->write_log(__FILE__, __LINE__, self::LVL_ERROR,
+							 sprintf('%03d', $iid).': Error saving data');
 	}
 
 	/**
@@ -255,7 +263,8 @@ class identity_switch_cfg extends identity_switch_prefs
 			return $_SESSION[self::TABLE][$sect];
 
 		// we should never go here
-	    self::write_log(__FILE__, __LINE__, 'Variable "'.$var.'" not available!');
+	    self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Variable "'.$var.'" not available!');
+
 		return null;
 	}
 
@@ -315,21 +324,35 @@ class identity_switch_cfg extends identity_switch_prefs
 	/**
 	 * 	Write log message
 	 *
-	 * 	@param string $txt 		Log message
 	 * 	@param string $file		File name
 	 * 	@param string $line		Line number
-	 * 	@param bool   $debug 	TRUE=Is debug message; FALSE=regular message (default)
+	 * 	@param int	  $lvl		LVL_ERROR; LVL_EXEC (default); LVL_DEBUG
+	 * 	@param string $txt 		Log message
 	 */
-	static public function write_log(string $file, int $line, string $txt, bool $debug = false): void
+	static public function write_log(string $file, int $line, int $lvl = self::LVL_EXEC, string $txt): void
 	{
-		if (!isset($_SESSION[self::TABLE]['cfg']))
+		if (!isset($_SESSION[self::TABLE]['cfg']['logging']))
 			return;
 
-		if (!$debug && $_SESSION[self::TABLE]['cfg']['logging'] > 0)
-			rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
+		switch ($lvl)
+		{
+		case self::LVL_ERROR:
+			rcmail::get_instance()->write_log('error', basename($file).'('.$line.'): '.$txt);
 
-		if ($debug && $_SESSION[self::TABLE]['cfg']['logging'] == 2)
-			rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): Debug: '.$txt);
+		case self::LVL_EXEC:
+			if ($lvl == 0 || $_SESSION[self::TABLE]['cfg']['logging'] > 0)
+				rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
+			break;
+
+		case self::LVL_DEBUG:
+			if ($_SESSION[self::TABLE]['cfg']['logging'] == 2)
+				rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): Debug: '.$txt);
+			break;
+
+		default:
+			self::write_log($file, $line, 'Invalid log level ('.$lvl.')');
+			break;
+		}
 	}
 
 }

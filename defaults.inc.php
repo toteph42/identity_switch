@@ -31,8 +31,8 @@ $config['identity_switch.config'] = [
 		'cfg_lsize'					=> 34,
 
 		// Set logging level for 'logs/identity_switch.log'.
-		// 0 = None (default)
-		// 1 = Exceution and Error messages
+		// 0 = Error messages (default) will be written to log file as well as to RoundCube error log file
+		// 1 = Exceution messages
 		// 2 = Additional debug mesages
 		'cfg_logging'				=> 0,
 

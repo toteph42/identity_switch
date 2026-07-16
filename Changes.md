@@ -1,5 +1,13 @@
 # Changelog identity switch plugin
 
+## Release 3.0.13
+
+* MiMoHo: Added check of request token to avoid cross-site request forgery (CRRF)
+* Error logging modified
+* Error message now additionally written to RoundCube error log file
+* Added exit if get() function fails on storage connect
+* Catching underflow in check_flag()
+
 ## Release 3.0.12
 
 * Dropped some SQL scripts

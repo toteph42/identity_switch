@@ -131,7 +131,7 @@ class identity_switch extends identity_switch_cfg
 		// check skin
 		if (($skin = $rc->config->get('skin')) != 'elastic')
 		{
-			self::write_log(__FILE__, __LINE__, 'Skin "'.$skin.'" is not supported');
+			self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Skin "'.$skin.'" is not supported');
 			return $args;
 		}
 
@@ -191,7 +191,7 @@ class identity_switch extends identity_switch_cfg
 			// slicing in drop down box
 			if (!($p1 = strpos($args['content'], '<span class="header-title username">')))
 			{
-				self::write_log(__FILE__, __LINE__, 'Cannot insert drop down box - skipping');
+				self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Cannot insert drop down box - stopping execution');
 				return $args;
 			}
 			$div   = '<div id="identity_switch_menu"'.
@@ -243,7 +243,8 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function on_storage_connect(array $args): array
 	{
-		$rec = self::get(self::get('cfg', 'iid'));
+		if (!($rec = self::get(self::get('cfg', 'iid'))))
+			return $args;
 
 		foreach ( [ 'auth_type' => 0, 'skip_deleted' => 0, 'auth_cid' => 0, 'auth_pw' => 0,
 					'debug' => 0, 'force_caps' => 0, 'disabled_caps' => 1, 'socket_options' => 0,
@@ -289,8 +290,10 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function on_smtp_connect(array $args): array
 	{
+		if (!($rec = self::get(self::get('cfg', 'iid'))))
+			return $args;
+
 		$rc = rcmail::get_instance();
-		$rec = self::get(self::get('cfg', 'iid'));
 
 		foreach ( [ 'smtp_host' => 0, 'smtp_user' => 0, 'smtp_pass' => 0, 'smtp_auth_cid' => 0,
 					'smtp_auth_pw' => 0, 'smtp_auth_type' => 0, 'smtp_helo_host' => 0,
@@ -392,12 +395,13 @@ class identity_switch extends identity_switch_cfg
 			case 'read':
 				if ($unseen > 0)
 					$unseen--;
-				self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Mail flag "unread" deleted', true);
+				self::write_log(__FILE__, __LINE__, self::LVL_DEBUG,
+								sprintf('%03d', $iid).': Mail flag "unread" deleted');
 				break;
 
 			case 'unread':
 				$unseen++;
-				self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Mail flag "unread" set', true);
+				self::write_log(__FILE__, __LINE__, self::LVL_DEBUG, sprintf('%03d', $iid).': Mail flag "unread" set');
 				break;
 
 			default:
@@ -408,6 +412,10 @@ class identity_switch extends identity_switch_cfg
 		default:
 			return $args;
 		}
+
+		// catch overflow
+		if ($unseen < 0)
+			$unseen = 0;
 
 		if (($old = self::get($iid, '_unseen')) <> $unseen)
 		{
@@ -424,7 +432,14 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function switch_identity(): void
 	{
-        // get new identity
+		$rc = rcmail::get_instance();
+
+		if (!$rc->check_request()) {
+		    self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Invalid request token - stopping execution');
+		    return;
+		}
+
+		// get new identity
         $iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST);
 		// activate identity
         self::set('cfg', 'iid', $iid);
@@ -434,7 +449,7 @@ class identity_switch extends identity_switch_cfg
 		$_SESSION['password'] = $rec['isw_imap_pass'];
 
         // send response
-		rcmail::get_instance()->output->redirect( [
+		$rc->output->redirect( [
 				'_task' => 'mail',
 				'_mbox' => 'INBOX',
 		], 0 );
@@ -446,6 +461,11 @@ class identity_switch extends identity_switch_cfg
 	function check_newmail()
 	{
 		$rc = rcmail::get_instance();
+
+		if (!$rc->check_request()) {
+		    self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Invalid request token - stopping execution');
+			return;
+		}
 
 		// get iid to check
 		$iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST);
@@ -469,7 +489,8 @@ class identity_switch extends identity_switch_cfg
 		}
 		if ($n == self::get('cfg', 'retries'))
 		{
-			self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': Cannot connect to "'.
+			self::write_log(__FILE__, __LINE__, self::LVL_EXEC,
+							sprintf('%03d', $iid).': Cannot connect to "'.
 							$rec['isw_imap_ssl'].'://'.$rec['isw_imap_host'].':'.$rec['isw_imap_port'].
 							'" for user "'.$rec['isw_imap_user'].'"');
 			return;
@@ -502,8 +523,9 @@ class identity_switch extends identity_switch_cfg
 
 	    if ($unseen <> $rec['_unseen'])
 	    {
-			self::write_log(__FILE__, __LINE__, sprintf('%03d', $iid).': '.$unseen.' new mails found'.
-							' (old value: '.$rec['_unseen'].')', true);
+			self::write_log(__FILE__, __LINE__, self::LVL_EXEC,
+							sprintf('%03d', $iid).': '.$unseen.' new mails found'.
+							' (old value: '.$rec['_unseen'].')');
 			self::set($iid, '_old', $rec['_unseen']);
 			if ($unseen > $rec['_unseen'])
 		    	self::set($iid, '_notify', true);
