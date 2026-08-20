@@ -1,5 +1,12 @@
 # Changelog identity switch plugin
 
+## Release 3.0.14
+
+* write_log() redeclared
+* Stopping execution when called by ActiveSync command
+* Stopping execution id default user email not available
+* Now writing severe errors to errors.log (not error.log)
+
 ## Release 3.0.13
 
 * MiMoHo: Added check of request token to avoid cross-site request forgery (CRRF)

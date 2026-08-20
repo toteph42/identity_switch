@@ -51,8 +51,11 @@ class identity_switch extends identity_switch_cfg
 	function init(): void
 	{
 		// skip plugin initialization, when running in CLI environement
-		if (php_sapi_name() === 'cli')
+		if (php_sapi_name() == 'cli' || (isset($_SERVER['SCRIPT_URL']) && strpos($_SERVER['SCRIPT_URL'], 'ActiveSync')))
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_EXEC, 'Called by CLI or "ActiveSync" - stopping execution');
 			return;
+		}
 
 		$rc = rcmail::get_instance();
 

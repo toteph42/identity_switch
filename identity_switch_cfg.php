@@ -57,6 +57,11 @@ class identity_switch_cfg extends identity_switch_prefs
 
 		// load identity parameter for default identity
 		$r = $rc->user->get_identity();
+		if (!isset($r['email']))
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Cannot catch default user email - stopping execution');
+			exit();
+		}
 		self::get_cfg(0, $r['email']);
 
 		// load all other known identities
@@ -326,10 +331,10 @@ class identity_switch_cfg extends identity_switch_prefs
 	 *
 	 * 	@param string $file		File name
 	 * 	@param string $line		Line number
-	 * 	@param int	  $lvl		LVL_ERROR; LVL_EXEC (default); LVL_DEBUG
 	 * 	@param string $txt 		Log message
+	 * 	@param int	  $lvl		LVL_ERROR; LVL_EXEC (default); LVL_DEBUG
 	 */
-	static public function write_log(string $file, int $line, int $lvl = self::LVL_EXEC, string $txt): void
+	static public function write_log(string $file, int $line, int $lvl, string $txt): void
 	{
 		if (!isset($_SESSION[self::TABLE]['cfg']['logging']))
 			return;
@@ -337,7 +342,7 @@ class identity_switch_cfg extends identity_switch_prefs
 		switch ($lvl)
 		{
 		case self::LVL_ERROR:
-			rcmail::get_instance()->write_log('error', basename($file).'('.$line.'): '.$txt);
+			rcmail::get_instance()->write_log('errors', basename($file).'('.$line.'): '.$txt);
 
 		case self::LVL_EXEC:
 			if ($lvl == 0 || $_SESSION[self::TABLE]['cfg']['logging'] > 0)
@@ -350,7 +355,7 @@ class identity_switch_cfg extends identity_switch_prefs
 			break;
 
 		default:
-			self::write_log($file, $line, 'Invalid log level ('.$lvl.')');
+			self::write_log($file, $line, LVL_ERROR, 'Invalid log level ('.$lvl.')');
 			break;
 		}
 	}
