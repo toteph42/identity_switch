@@ -200,7 +200,7 @@ class identity_switch extends identity_switch_cfg
 			$div   = '<div id="identity_switch_menu"'.
 				     ' class="form-control"'.
 				     ' onclick="identity_switch_toggle_menu('.$off * $size.')"'.
-				     ' style="background-color: transparent; height: 30px;width: 180px; padding-left: 10px;">'.
+				     ' style="background-color: transparent; height: 30px;width: 90% padding-left: 10px;">'.
 				     rcube::Q(self::get($iid, 'isw_label'));
 
 			$div .= '<div id="identity_switch_dropdown" style="line-height:'.$size.'px;'.

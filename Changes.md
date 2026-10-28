@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 3.0.15
+
+* Top menu has now a relativ width
+* SQL statement reqritten
+
 ## Release 3.0.14
 
 * write_log() redeclared
