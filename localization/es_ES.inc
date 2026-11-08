@@ -10,13 +10,14 @@ declare(strict_types=1);
 $labels = [];
 
 $labels['isw.common.label'] = 'Nombre de la identidad en el cuadro de selección';
+$labels['idsw.common.noedit'] = 'La información de identidad no se puede introducir hasta que el registro haya sido guardado por primera vez';
 $labels['isw.notify.caption'] = 'Nuevos mensajes';
 $labels['isw.notify.basic'] = 'Mostrar notificaciones del navegador para nuevos mensajes';
 $labels['isw.notify.desktop'] = 'Mostrar notificaciones de escritorio para nuevos mensajes';
 $labels['isw.notify.timeout'] = 'Cerrar notificación de escritorio';
 $labels['isw.notify.sound'] = 'Reproducir sonido para nuevos mensajes';
 $labels['isw.notify.test'] = 'Prueba';
-$labels['isw.used.prefs'] = 'Preferences managed by dentity_switch plugin';
+$labels['isw.used.prefs'] = 'Preferences managed by identity_switch plugin';
 $labels['isw.hide.prefs'] = 'Preferences were hidden according to plugin configuration.';
 $labels['isw.identity'] = 'Identidad';
 $labels['isw.notify.title'] = 'Nuevos correos electrónicos';
@@ -25,3 +26,25 @@ $labels['isw.notify.err.autoplay'] = 'No se puede reproducir el archivo de sonid
 				'Por favor, comprueba la configuración de "Reproducción automática" de esta página en tu navegador.';
 $labels['isw.notify.err.notification'] = 'No se puede enviar la notificación!'."\r\n".
 				'Por favor, comprueba la configuración de "Notificaciones" de esta página en tu navegador.';
+
+$labels['idsw.imap.caption'] = 'IMAP';
+$labels['idsw.imap.user'] = 'Nombre de usuario';
+$labels['idsw.imap.pass'] = 'Contraseña';
+$labels['idsw.imap.host'] = 'Nombre del servidor';
+$labels['idsw.imap.port'] = 'Puerto';
+$labels['idsw.imap.auth'] = 'Cifrado';
+$labels['idsw.imap.auth.none'] = 'Ninguno';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
+$labels['idsw.imap.delim'] = 'Delimitador de jerarquía de carpetas';
+
+$labels['idsw.smtp.caption'] = 'SMTP';
+$labels['idsw.smtp.user'] = 'Nombre de usuario';
+$labels['idsw.smtp.pass'] = 'Contraseña';
+$labels['idsw.smtp.host'] = 'Nombre del servidor';
+$labels['idsw.smtp.tls'] = 'Conexión segura (TLS)';
+$labels['idsw.smtp.port'] = 'Puerto';
+$labels['idsw.smtp.auth'] = 'Cifrado';
+$labels['idsw.smtp.auth.none'] = 'Ninguno';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';

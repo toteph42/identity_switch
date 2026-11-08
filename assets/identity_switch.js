@@ -104,16 +104,15 @@ function identity_switch_notify_basic()
     var w = rcmail.is_framed() ? window.parent : window;
     w.focus();
 
-    var src = rcmail.assets_path('plugins/identity_switch/assets');
-
     // we cannot simply change a href attribute, we must to replace the link element (at least in FF)
-	var link = $('<link rel="shortcut icon">').attr('href', src + '/alert.ico');
+	var url = rcmail.assets_path('plugins/identity_switch/assets');
+	var link = $('<link rel="shortcut icon">').attr('href', url + '/alert.ico');
  	var olink = $('link[rel="shortcut icon"]', w.document);
     if (!rcmail.env.favicon_href)
         rcmail.env.favicon_href = olink.attr('href');
 
     rcmail.env.favicon_changed = 1;
-    link.replaceAll(olink);
+	link.replaceAll(olink);
 }
 
 // desktop notification

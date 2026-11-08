@@ -66,15 +66,29 @@ class identity_switch_prefs extends rcube_plugin
 	{
 		$this->add_texts('localization');
 
-        $iid   = !isset($args['record']['identity_id']) ? (int)identity_switch_cfg::get('cfg', 'default_iid') :
-        		 (int)$args['record']['identity_id'];
-		$val = identity_switch_cfg::get($iid, 'isw_label');
+		if (isset($args['record']['identity_id']))
+		{
+			$hidden = 0;
+			$iid = (int)$args['record']['identity_id'];
+	       	if (!is_array($rec = identity_switch_cfg::get($iid, null, false)))
+	       	{
+	       		$val = '';
+	       		$rec = identity_switch_cfg::get_cfg($iid, $args['record']['email']);
+	       	} else
+	       		$val = $rec['isw_label'];
+		} else
+		{
+			$hidden = 1;
+        	$val = $this->gettext('idsw.common.noedit');
+		}
+
 		$fld = rcube_output::get_edit_field('isw_label', $val, [
             						'label' 	=> rcube::Q($this->gettext('isw.common.label')),
 			              			'type'  	=> 'text',
 							        'maxlength' => 32,
 							        'size'	  	=> 40,
             						'value'		=> $val,
+									'disabled'	=> $hidden,
         ], 'text');
 
 		// insert identity label
@@ -88,31 +102,115 @@ class identity_switch_prefs extends rcube_plugin
             ] +
             array_slice($args['form']['addressing']['content'], $pos, null, true);
 
-        // get configuration?
-		$cfg  = '';
-		$hide = identity_switch_cfg::get('cfg', 'hide_prefs');
+	    if ($hidden)
+	    	return $args;
 
-		if ($hide)
-			$cfg = rcube::Q($this->gettext('isw.hide.prefs'));
-		else
-		{
-			if (is_array($t = identity_switch_cfg::get($iid)))
-			    foreach ($t as $k => $v)
+        // configuration string
+		$cfg = '';
+
+	    switch ($typ = identity_switch_cfg::get('cfg', 'typ')) {
+		case 1: 												// simple view
+			$authImap = new html_select([ 'name' => "_isw_imap_auth" ]);
+			$authImap->add($this->gettext('idsw.imap.auth.none'), 'none');
+			$authImap->add($this->gettext('idsw.imap.auth.ssl'), 'ssl');
+			$authImap->add($this->gettext('idsw.imap.auth.tls'), 'tls');
+
+			$args['form']['imap'] = [
+				'name' 	  => $this->gettext('idsw.imap.caption'),
+				'content' => [
+					'isw_imap_user' 	=> [ 'label' => $this->gettext('idsw.imap.user'),
+										   'type' => 'text', 'maxlength' => 64 ],
+					'isw_imap_pass' 	=> [ 'label' => $this->gettext('idsw.imap.pass'),
+										   'type' => 'password', 'maxlength' => 128 ],
+					'isw_imap_host'	 	=> [ 'label' => $this->gettext('idsw.imap.host'),
+										   'type'  => 'text', 'maxlength' => 64 ],
+					'isw_imap_auth' 	=> [ 'label' => $this->gettext('idsw.imap.auth'),
+										   'value' => $authImap->show($rec['isw_imap_ssl']) ],
+					'isw_imap_port' 	=> [ 'label' => $this->gettext('idsw.imap.port'),
+										   'type' => 'text', 'maxlength' => 5 ],
+					'isw_imap_delim'	=> [ 'label' => $this->gettext('idsw.imap.delim'),
+									  	   'type' => 'text', 'maxlength' => 1 ],
+				],
+			];
+			$args['record']['isw_imap_user'] 	= $rec['isw_imap_user'];
+	        $args['record']['isw_imap_pass']  	= strlen($rec['isw_imap_pass']) ?
+	        								  	  rcmail::get_instance()->decrypt($rec['isw_imap_pass']) : '';
+			$args['record']['isw_imap_host'] 	= $rec['isw_imap_host'];
+	        $args['record']['isw_imap_port'] 	= $rec['isw_imap_port'];
+	        $args['record']['isw_imap_delim'] 	= $rec['isw_imap_delimiter'];
+
+			$authSmtp = new html_select([ 'name' => "_isw_smtp_auth" ]);
+			$authSmtp->add($this->gettext('idsw.smtp.auth.none'), 'none');
+			$authSmtp->add($this->gettext('idsw.smtp.auth.ssl'), 'ssl');
+			$authSmtp->add($this->gettext('idsw.smtp.auth.tls'), 'tls');
+
+			$args['form']['smtp'] = [
+				'name' 	  => $this->gettext('idsw.smtp.caption'),
+				'content' => [
+					'isw_smtp_user' 	=> [ 'label' => $this->gettext('idsw.smtp.user'),
+										   'type' => 'text', 'maxlength' => 64 ],
+					'isw_smtp_pass' 	=> [ 'label' => $this->gettext('idsw.smtp.pass'),
+										   'type' => 'password', 'maxlength' => 128 ],
+		        	'isw_smtp_host'	 	=> [ 'label' => $this->gettext('idsw.smtp.host'),
+										   'type' => 'text', 'maxlength' => 64 ],
+					'isw_smtp_auth' 	=> [ 'label' => $this->gettext('idsw.smtp.auth'),
+										   'value' => $authSmtp->show($rec['isw_smtp_ssl']) ],
+		        	'isw_smtp_port' 	=> [ 'label' => $this->gettext('idsw.smtp.port'),
+										   'type' => 'text', 'maxlength' => 5 ],
+				],
+			];
+	       	$args['record']['isw_smtp_user'] = $rec['isw_smtp_user'];
+	       	if ($rec['isw_smtp_pass'] == '%p')
+		        $args['record']['isw_smtp_pass'] = $rec['isw_smtp_pass'];
+	       	elseif (strlen($rec['isw_smtp_pass']))
+	       		$args['record']['isw_smtp_pass'] = rcmail::get_instance()->decrypt($rec['isw_smtp_pass']);
+			$args['record']['isw_smtp_host'] = $rec['isw_smtp_host'];
+	        $args['record']['isw_smtp_port'] = $rec['isw_smtp_port'];
+
+	        $args['isw_call'] = $rec;
+	        $args = self::mailbox($args);
+
+		case 2:													// complex view
+			if (is_array($rec = identity_switch_cfg::get($iid)))
+			    foreach ($rec as $k => $v)
 	        		$cfg .= self::show_val($k, $v);
-		}
+	        if ($typ == 1)
+	        {
+	        	$t = new html_inputfield([ 'name' => '_isw_prefs', 'type' => 'hidden', 'value' => $cfg ]);
+	        	$args['form']['isw_prefs'] = [ 'name' => '', 'content' => $t->show() ];
+	        } else
+	        {
+				$t = new html_textarea();
+				$args['form']['isw_prefs'] = [
+					'name'		=> rcube::Q($this->gettext('isw.used.prefs')),
+					'type'		=> 'textarea',
+					'content'	=> $t->show($cfg, [
+								   'name' 		=> '_isw_prefs',
+								   'rows' 		=> 10,
+								   'style' 		=> 'border-style=inherit',
+								   'disabled' 	=> '0',
+								   'wrap' 		=> 'off',
+					]),
+				];
+	        }
+	        break;
 
-		$t = new html_textarea();
-		$args['form']['isw_prefs'] = [
-			'name'		=> rcube::Q($this->gettext('isw.used.prefs')),
-			'type'		=> 'textarea',
-			'content'	=> $t->show($cfg, [
-						   'name' 		=> '_isw_prefs',
-						   'rows' 		=> 10,
-						   'style' 		=> 'border-style=inherit',
-						   'disabled' 	=> $hide ? '1' : '0',
-						   'wrap' 		=> 'off',
-			]),
-		];
+		default:												// disabled
+			$cfg = rcube::Q($this->gettext('isw.hide.prefs'));
+			$t = new html_textarea();
+			$args['form']['isw_prefs'] = [
+				'name'		=> rcube::Q($this->gettext('isw.used.prefs')),
+				'type'		=> 'textarea',
+				'content'	=> $t->show($cfg, [
+							   'name' 		=> '_isw_prefs',
+							   'rows' 		=> 10,
+							   'style' 		=> 'border-style=inherit',
+							   'disabled' 	=> '1',
+							   'wrap' 		=> 'off',
+				]),
+			];
+			break;
+		}
 
 		return $args;
 	}
@@ -196,8 +294,9 @@ class identity_switch_prefs extends rcube_plugin
 	function save_isw_prefs(array $args): array
 	{
 		// saving identity data
-		$iid   = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
-		$prefs = identity_switch_cfg::get($iid);
+		$iid = !isset($args['id']) ? (int)identity_switch_cfg::get('cfg', 'iid') : (int)$args['id'];
+		if (!is_array($prefs = identity_switch_cfg::get($iid, null, false)))
+			$prefs = identity_switch_cfg::get_cfg($iid, $args['record']['email']);
 		$passw = [ $prefs['isw_imap_pass'], $prefs['isw_smtp_pass'] ];
 
 		// get list of locked preferences
@@ -235,16 +334,45 @@ class identity_switch_prefs extends rcube_plugin
 			if ($v = rcube_utils::get_input_value('_isw_prefs', rcube_utils::INPUT_POST))
 				foreach (explode("\n", $v) as $r)
 					self::get_val($prefs, $r);
-		}
 
-		// special password check
-		foreach ($prefs as $k => $v)
-			if (strpos($k, 'pass') !== false)
+			// simple view?
+			if (identity_switch_cfg::get('cfg', 'typ') == 1)
 			{
-				// swap old password?
-				if ($v == '●●●●●●●●')
-					$prefs[$k] = $passw[$k == 'isw_imap_pass' ? 0 : 1];
+				foreach ([ 'isw_imap_user',
+						   'isw_imap_pass',
+						   'isw_imap_host',
+						   'isw_imap_port',
+						   'isw_imap_delim',
+						   'isw_smtp_user',
+						   'isw_smtp_pass',
+						   'isw_smtp_host',
+						   'isw_smtp_port',
+						   'isw_notification_timeout' ] as $k)
+				{
+					$v = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
+					if (strpos($k, 'pass') && $v != '%p')
+						$prefs[$k] = rcmail::get_instance()->encrypt($v);
+					else
+						$prefs[$k] = $v;
+				}
+
+				foreach ([ 'isw_check_all_folders',
+						   'isw_notification_basic',
+						   'isw_notification_desktop',
+						   'isw_notification_sound' ] as $k)
+					$prefs[$k] = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST) == 1 ? true : false;
+			} else
+			{
+				// special password check
+				foreach ($prefs as $k => $v)
+					if (strpos($k, 'pass') !== false)
+					{
+						// swap old password?
+						if ($v == '●●●●●●●●')
+							$prefs[$k] = $passw[$k == 'isw_imap_pass' ? 0 : 1];
+					}
 			}
+		}
 
 		// replace preferences
 		identity_switch_cfg::del($iid);
@@ -270,6 +398,9 @@ class identity_switch_prefs extends rcube_plugin
 
 		// delete identity from cache
 		identity_switch_cfg::del($iid);
+
+		// set default identity
+		identity_switch_cfg::set('cfg', 'iid', identity_switch_cfg::get('cfg', 'default_iid'));
 
 		// rebuild dropdown
 		identity_switch::$_menu = false;
@@ -421,27 +552,56 @@ class identity_switch_prefs extends rcube_plugin
 	private function mailbox(array $args): array
 	{
 		$rc  = rcmail::get_instance();
-		$iid = identity_switch_cfg::get('cfg', 'iid');
-		$rec = identity_switch_cfg::get($iid);
 
 		// get list of locked preferences
 		$no_override = $rc->config->get('dont_override');
 
-		$set = &$args['blocks']['new_message'];
-		$set['name'] = rcube::Q('[ '.$this->gettext('isw.identity').': '.$rec['isw_label'].' ] ').$set['name'];
-
 		// change working set
-		$set = &$args['blocks']['new_message']['options'];
+		if (isset($args['isw_call']))
+		{
+			$rec = $args['isw_call'];
 
-		$field_id = 'isw_check_all_folders';
-		if (!isset($no_override[$field_id]) && isset($rec[$field_id]))
-       	{
-			$sel = new html_checkbox(['name' => '_'.$field_id, 'id' => $field_id, 'value' => 1]);
+			$args['form']['notify'] = [
+				'name' 	  => $this->gettext('isw.notify.caption'),
+				'content' => [],
+			];
+			$set = &$args['form']['notify']['content'];
+			$tit = 'label';
+			$val = 'value';
 
-            $set[$field_id] = [
-                        'title'   => html::label($field_id, rcube::Q($rc->gettext('checkallfolders'))),
-                        'content' => $sel->show($rec[$field_id]),
-        	];
+			$field_id = 'isw_check_all_folders';
+			if (!isset($no_override[$field_id]) && isset($rec[$field_id]))
+		    {
+				$sel = new html_checkbox(['name' => '_'.$field_id, 'id' => $field_id, 'value' => 1]);
+
+		        $set[$field_id] = [
+		                       	$tit   	=> rcube::Q($rc->gettext('checkallfolders')),
+		                        $val	=> $sel->show($rec[$field_id]),
+		        ];
+			}
+		} else
+		{
+			$iid = identity_switch_cfg::get('cfg', 'iid');
+			$rec = identity_switch_cfg::get($iid);
+
+			$set = &$args['blocks']['new_message'];
+			$set['name'] = rcube::Q('[ '.$this->gettext('isw.identity').': '.$rec['isw_label'].' ] ').$set['name'];
+
+			$set = &$args['blocks']['new_message']['options'];
+			$tit = 'title';
+			$val = 'content';
+
+			unset($set['check_all_folders']);
+			$field_id = 'isw_check_all_folders';
+			if (!isset($no_override[$field_id]) && isset($rec[$field_id]))
+		    {
+				$sel = new html_checkbox(['name' => '_'.$field_id, 'id' => $field_id, 'value' => 1]);
+
+		        $set[$field_id] = [
+		                       	$tit   	=> html::label($field_id, rcube::Q($rc->gettext('checkallfolders'))),
+		                        $val	=> $sel->show($rec[$field_id]),
+		        ];
+			}
 		}
 
 		// our own preferences
@@ -450,12 +610,12 @@ class identity_switch_prefs extends rcube_plugin
 		{
 			$cb = new html_checkbox([ 'name' => '_'.$field_id, 'id' => $field_id, 'value' => '1' ]);
 
-			$set[$field_id]   = [ 'title'  	=> $this->gettext('isw.notify.basic'),
-								  'content'	=> $cb->show($rec[$field_id]).
-								  		   		html::a([ 'href' => '#',
-											   'onclick' => 'identity_switch_basic(); return false',
-											   'name' => '_notify_basic_test' ],
-			                	       	 	   $this->gettext('isw.notify.test')) ];
+			$set[$field_id]   = [ $tit  => $this->gettext('isw.notify.basic'),
+								  $val	=> $cb->show($rec[$field_id]).
+								  		 	html::a([ 'href' => '#',
+											'onclick' => 'identity_switch_notify_basic(); return false',
+											'name' => '_notify_basic_test' ],
+			                	       	 	$this->gettext('isw.notify.test')) ];
 		}
 
 		$field_id = 'isw_notification_desktop';
@@ -463,24 +623,24 @@ class identity_switch_prefs extends rcube_plugin
 		{
 			$cb = new html_checkbox([ 'name' => '_'.$field_id, 'id' => $field_id, 'value' => '1' ]);
 
-			$set[$field_id]   = [ 'title'	=> $this->gettext('isw.notify.desktop'),
-								  'content'	=> $cb->show($rec[$field_id]).
-										   		html::a(['href' => '#',
-											   'onclick' => 'identity_switch_desktop(\''.
-											   rawurlencode($this->gettext('isw.notify.title')).'\',\''.
-											   rawurlencode(sprintf($this->gettext('isw.notify.msg'), 1,
-										       $rec['isw_label'])).
-											   '\',\''.$rec['isw_notification_timeout'].'\',\''.
-											   rawurlencode($this->gettext('isw.notify.err.notification')).
-											   '\'); return false',
-											   'name' => '_notify_desktop_test' ],
-										 	  $this->gettext('isw.notify.test')) ];
+			$set[$field_id]   = [ $tit	=> $this->gettext('isw.notify.desktop'),
+								  $val 	=> $cb->show($rec[$field_id]).
+										   	html::a(['href' => '#',
+											'onclick' => 'identity_switch_notify_desktop(\''.
+											rawurlencode($this->gettext('isw.notify.title')).'\',\''.
+											rawurlencode(sprintf($this->gettext('isw.notify.msg'), 1,
+										    $rec['isw_label'])).
+											'\',\''.$rec['isw_notification_timeout'].'\',\''.
+											rawurlencode($this->gettext('isw.notify.err.notification')).
+											'\'); return false',
+											'name' => '_notify_desktop_test' ],
+										 	$this->gettext('isw.notify.test')) ];
 
 			$to = new html_select([ 'name' => '_isw_notification_timeout' ]);
         	foreach ([ 5, 10, 15, 30, 45, 60 ] as $sec)
             		$to->add($this->gettext(['name' => 'afternseconds', 'vars' => [ 'n' => $sec ]]), $sec);
-			$set['isw_notification_timeout'] = [ 'title' 	=> $this->gettext('isw.notify.timeout'),
-												 'content'	=> $to->show((int)$rec['isw_notification_timeout']) ];
+			$set['isw_notification_timeout'] = [ $tit	=> $this->gettext('isw.notify.timeout'),
+												 $val	=> $to->show((int)$rec['isw_notification_timeout']) ];
 		}
 
 		$field_id = 'isw_notification_sound';
@@ -488,14 +648,14 @@ class identity_switch_prefs extends rcube_plugin
 		{
 			$cb = new html_checkbox([ 'name' => '_'.$field_id, 'id' => $field_id, 'value' => '1' ]);
 
-			$set[$field_id]   = [ 'title' 	=> $this->gettext('isw.notify.sound'),
-								  'content' => $cb->show($rec[$field_id]).
-												  html::a(['href' => '#',
-												  'onclick' => 'identity_switch_sound(\''.
-												  rawurlencode($this->gettext('isw.notify.err.autoplay')).
-												  '\'); return false',
-												  'name' => '_notify_sound_test' ],
-												  $this->gettext('isw.notify.test')) ];
+			$set[$field_id]   = [ $tit	=> $this->gettext('isw.notify.sound'),
+								  $val 	=> $cb->show($rec[$field_id]).
+											html::a(['href' => '#',
+											'onclick' => 'identity_switch_notify_sound(\''.
+											rawurlencode($this->gettext('isw.notify.err.autoplay')).
+											'\'); return false',
+											'name' => '_notify_sound_test' ],
+											$this->gettext('isw.notify.test')) ];
 		}
 
 		return $args;

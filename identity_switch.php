@@ -33,7 +33,6 @@ declare(strict_types=1);
 
 require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
 require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_cfg.php';
-require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_migrate.php';
 
 class identity_switch extends identity_switch_cfg
 {
@@ -71,10 +70,6 @@ class identity_switch extends identity_switch_cfg
 		// register our own action handler
 		$this->register_action('identity_switch_run',  	  [ $this, 'switch_identity' ]);
 		$this->register_action('identity_switch_newmail', [ $this, 'check_newmail' ]);
-
-		// check for migration
-		if (!isset($_SESSION[identity_switch_cfg::TABLE]))
-	    	new identity_switch_migrate();
 
 		// load settings
 		parent::init();
@@ -249,11 +244,12 @@ class identity_switch extends identity_switch_cfg
 		if (!($rec = self::get(self::get('cfg', 'iid'))))
 			return $args;
 
-		foreach ( [ 'auth_type' => 0, 'skip_deleted' => 0, 'auth_cid' => 0, 'auth_pw' => 0,
+		foreach ( [ 'auth_type' => 0, 'skip_deleted' => 0, 'auth_cid' => 0,
 					'debug' => 0, 'force_caps' => 0, 'disabled_caps' => 1, 'socket_options' => 0,
 					'timeout' => 0, 'driver' => 0, 'language' => 0, 'host' => 0, 'user' => 0,
 					'port' => 0, 'ssl' => 0, 'password' => 0,
 					// added for buggy RC 1.7.1 -> #10221
+					// 'auth_pw' => 0,
 					'pass' => 0,
 					'message_flags' => 1,
 					'ssl_mode' => 0, 'attempt' => 0, 'retry' => 0 ] as $key => $typ)
@@ -274,9 +270,8 @@ class identity_switch extends identity_switch_cfg
 			if ($key == 'debug')
 				$rec[$int] = self::get('cfg', 'imap_debug');
 
-			if ($rec[$int])
-				$args[$key] = $int == 'isw_imap_pass' ? rcmail::get_instance()->decrypt($rec[$int]) :
-							  ($typ ? (array)$rec[$int] : $rec[$int]);
+			$args[$key] = $int == 'isw_imap_pass' ? rcmail::get_instance()->decrypt($rec[$int]) :
+						  ($typ ? (array)$rec[$int] : $rec[$int]);
 		}
 
 		// unsupported hack

@@ -37,11 +37,7 @@ class identity_switch_cfg extends identity_switch_prefs
 		$rc = rcmail::get_instance();
 
 		// first load default config
-		foreach ( [ 'defaults.inc.php', 'config.inc.php' ] as $file)
-		{
-			parent::load_config($file);
-			self::$config = array_merge(self::$config, $rc->config->get('identity_switch.config', []));
-		}
+		self::_load_cfg();
 
 		// save global configuration parameters
 		foreach (self::$config as $nam => $set)
@@ -77,12 +73,29 @@ class identity_switch_cfg extends identity_switch_prefs
 	}
 
 	/**
+	 * 	Load default configuration
+	 */
+	private function _load_cfg(): void {
+
+		// load configuration
+		$rc = rcmail::get_instance();
+
+		// first load default config
+		foreach ( [ 'defaults.inc.php', 'config.inc.php' ] as $file)
+		{
+			parent::load_config($file);
+			self::$config = array_merge(self::$config, $rc->config->get('identity_switch.config', []));
+		}
+	}
+
+	/**
 	 * 	Get configuration for identity
 	 *
-	 * 	@param int $iid
-	 * 	@param string $email
+	 * 	@param 	int $iid
+	 * 	@param 	string $email
+	 *  @return array $rec
 	 */
-	protected function get_cfg(int $iid, string $email): void {
+	protected function get_cfg(int $iid, string $email): array {
 
 		$rc = rcmail::get_instance();
 
@@ -104,7 +117,8 @@ class identity_switch_cfg extends identity_switch_prefs
 			self::set($iid, 'isw_imap_host', $_SESSION['storage_host']);
 			self::set($iid, 'isw_imap_port', $_SESSION['storage_port']);
 			self::set($iid, 'isw_imap_ssl', $_SESSION['storage_ssl']);
-		}
+		} elseif (!isset(self::$config['*']))
+			self::_load_cfg();
 
 		// load preferences
 		self::load_cfg($iid, $email);
@@ -112,6 +126,8 @@ class identity_switch_cfg extends identity_switch_prefs
 		self::set($iid, '_unseen', 0);								// # of unseen messages
 		self::set($iid, '_notify', false);							// notify user flag
 		self::set($iid, '_checked', 0);								// last time check for new mail
+
+		return self::get($iid);
 	}
 
 	/**
@@ -235,8 +251,7 @@ class identity_switch_cfg extends identity_switch_prefs
 		$v;
 		$q   = $rc->db->query($sql, json_encode($prefs), $iid);
 		if ($rc->db->affected_rows($q) === false)
-			$this->write_log(__FILE__, __LINE__, self::LVL_ERROR,
-							 sprintf('%03d', $iid).': Error saving data');
+			$this->write_log(__FILE__, __LINE__, self::LVL_ERROR, sprintf('%03d', $iid).': Error saving data');
 	}
 
 	/**
@@ -244,10 +259,22 @@ class identity_switch_cfg extends identity_switch_prefs
 	 *
 	 * 	@param  string|int $sect
 	 * 	@param  string|int $var
-	 * 	@return string|int|bool|array
+	 *  @param  bool
+	 * 	@return string|int|bool|array|null
 	 */
-	protected function get(string|int|null $sect = null, string|int|null $var = null): mixed
+	protected function get(mixed $sect = null, mixed $var = null, bool $errchk = true): mixed
 	{
+		if (($t = gettype($sect)) != 'string' && $t != 'integer' && $t != 'NULL')
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Variable type "'.$t.'" invalid for variable "'.$sect.'"');
+			return null;
+		}
+		if (($t = gettype($var)) != 'string' && $t != 'integer' && $t != 'NULL')
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Variable type "'.$t.'" invalid for variable "'.$var.'"');
+			return null;
+		}
+
 		// check locking status
 		while (isset($_SESSION[self::TABLE]['cfg']['lock']) && $_SESSION[self::TABLE]['cfg']['lock'])
 			usleep(10);
@@ -268,7 +295,8 @@ class identity_switch_cfg extends identity_switch_prefs
 			return $_SESSION[self::TABLE][$sect];
 
 		// we should never go here
-	    self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Variable "'.$var.'" not available!');
+		if ($errchk)
+		    self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Section "'.$sect.'" Variable "'.$var.'" not found!');
 
 		return null;
 	}
@@ -281,13 +309,24 @@ class identity_switch_cfg extends identity_switch_prefs
 	 * 	@param string|int|bool|array $val
 	 * 	@param string|int|bool $default
 	 */
-	protected function set(string|int $sect, array|string|int $var, mixed $val = null, mixed $default = null): void
+	protected function set(mixed $sect, mixed $var, mixed $val = null, mixed $default = null): void
 	{
+		if (($t = gettype($sect)) != 'string' && $t != 'integer')
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Variable type "'.$t.'" invalid for variable "'.$sect.'"');
+			return;
+		}
+		if (($t = gettype($var)) != 'string' && $t != 'integer' && $t != 'array')
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_ERROR, 'Variable type "'.$t.'" invalid for variable "'.$var.'"');
+			return;
+		}
+
 		// table defied?
 		if (!isset($_SESSION[self::TABLE]))
 			$_SESSION[self::TABLE] = [];
 
-		// check locking status
+		// lock table
 		if (isset($_SESSION[self::TABLE]['cfg']['lock']))
 			while ($_SESSION[self::TABLE]['cfg']['lock'])
 				usleep(10);
@@ -302,6 +341,7 @@ class identity_switch_cfg extends identity_switch_prefs
 		} else
 			$_SESSION[self::TABLE][$sect][$var] = $val;
 
+		// unlock table
 		$_SESSION[self::TABLE]['cfg']['lock'] = false;
 	}
 
@@ -313,7 +353,7 @@ class identity_switch_cfg extends identity_switch_prefs
 	 */
 	protected function del(string|int|null $sect = null, ?string $var = null): void
 	{
-		// check locking status
+			// check locking status
 		while (isset($_SESSION[self::TABLE]['cfg']['lock']) && $_SESSION[self::TABLE]['cfg']['lock'])
 			usleep(10);
 
@@ -323,7 +363,7 @@ class identity_switch_cfg extends identity_switch_prefs
 		if ($sect)
 			unset($_SESSION[self::TABLE][$sect]);
 		else
-			unset($_SESSION[self::TABLE][$var]);
+			unset($_SESSION[self::TABLE][$sect][$var]);
 	}
 
 	/**
@@ -343,6 +383,8 @@ class identity_switch_cfg extends identity_switch_prefs
 		{
 		case self::LVL_ERROR:
 			rcmail::get_instance()->write_log('errors', basename($file).'('.$line.'): '.$txt);
+			$e = new \Exception;
+			error_log(var_export($e->getTraceAsString(), true));
 
 		case self::LVL_EXEC:
 			if ($lvl == 0 || $_SESSION[self::TABLE]['cfg']['logging'] > 0)

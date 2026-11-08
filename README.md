@@ -29,19 +29,14 @@ There are some new setting available in `Preference` -> `Mailbox view`.
 * **Close desktop notification** - Specify how many seconds should be visible before it is automatically been closed.
 * **Play sound...** - Select this option, if you want a sound notification. Please be aware, that only sound will be played one time only, even if there are new mails for multiple identities available (until next new-mail check cycle is started). If you hear no sound playing, please check your browser settings, if auto-play of sound files is enabled.
 
-If you select an identity to edit, then you'll see an additional box name **Preferences managed by identity_switch plugin**  with all user preferences used for this identity. You may edit the seeting and save them to the idenity. 
-
-Please note:
-* All passwords were show as ●●●●●●●●. If you enter a new password, it will be stored encrypted.
-* If you set the `cfg_hide_pref` to `true`, then all preferences will be hidden. 
-* Most of the settings were defined in `default.inc.php`. For a descption about allowed content please refer to`config/default.inc.php`. 
-* All preferences will override **RoundCube** settings for current identity. The accociated settings differs in name only by the `isw_` prefix used by plugin.
-
 ### Configuration ###
 
-There is a file `plugins/identity_switch/default.inc.php` in the plugin directory available. This file can be used to specify some individual preferences. Please copy file to `plugins/identity_switch/config.inc.php` and change there your preferences. 
-
-If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, `alert.ico` and `alert.gif` in sub-directory `assets`.
+* All plugin settings were defined in `default.inc.php`. For a descption about all supported **RoundCube** connection parameters please refer to `[base dir]/config/default.inc.php`. 
+* If you want to apply your own configurtion changes, please copy file `default.inc.php` to `config.inc.php` and change the preferences in this file.
+* All preferences will override **RoundCube** connection settings for active identity. 
+* Depending on configuration variable `cfg_typ` you'll see different option to edit when selecting a identity to edit. Either it is completely disabled or you may add **IMAP** and **SMTP** informations or you'll see a text box, allowing you to edit all connection paramaters in detail. 
+* Only `cfg_typ = 2`: All passwords were show as ●●●●●●●●. If you change your password by entering visible text, it will be encrypted immediately after you hit the **SAVE** button.
+* If you want to change sound, icon or desktop icon, please change `alert.mp3`, `alert.ico` and `alert.gif` in directory `assets`.
 
 ### Locking configuration ###
 
@@ -61,11 +56,19 @@ Versions 3.x - for **RoundCube** v1.6.x and 1.7.x requires PHP version >= 8.0.0.
 
 ### Limitations ###
 
-This plugin only supports `Elastic` skin. According to **RoundCube** team `Larry` and `Classic` skin is not longer supported. If you wan't to get another skin to be supoorted, then please contact me. I can add support for other skins if you pay for it. Or you modify plugin according to your needs and send me your changes.
+This plugin only supports `Elastic` skin. If you wan't to get another skin to be supoorted, then please contact me. I can add support for other skins if you pay for it. Or you modify plugin according to your needs and send me your changes.
 
 ### License ###
 
-This plugin is released under the [GNU General Public License v3.0](./LICENSE).
+This plugin is released under the [GNU General Public License v3.0].
+
+### Migration ###
+
+If you want to migrate plugin data from version 2.x, there is a small PHP script available. This can be called by entering`[URL]/plugin/identity_switch/idnetity_switch_migrate.php` in you favorite browser. You should then see at least two messages:
+
+`Trying to delete table "identity_switch"...`
+
+`0 identities successfully migrated.`
 
 ### Debugging ###
 
