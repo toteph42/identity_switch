@@ -36,12 +36,15 @@ $config['identity_switch.config'] = [
 		// 2 = Additional debug mesages
 		'cfg_logging'				=> 0,
 
-		// Hide user preference window when editing an identity
-		'cfg_hide_prefs'			=> false,
+		// Preference window when editing an identity
+		// 0= Disabled
+		// 1= Simple view
+		// 2= Complex view
+		'cfg_typ'					=> 1,
 
 		// debug IMAP connections for all identities
 		'cfg_imap_debug'			=> false,
-		// debug SMTP connections for all identities - not supported on idenity level
+		// debug SMTP connections for all identities - not supported on identity level
 		// 'cfg_smtp_debug'			=> false,
 
 		// ------------------------------------------------------------------------------------------------------
@@ -51,11 +54,6 @@ $config['identity_switch.config'] = [
 
 		// Some new notification handling settings introduced by plugin
 
-		// refresh interval
-		'isw_refresh_interval'		=> 'default',
-		// check all folders
-		'isw_check_all_folders' 	=> 'default',
-
 		// Basic notification
 		'isw_notification_basic' 	=> false,
 		// Desktop notification
@@ -63,9 +61,14 @@ $config['identity_switch.config'] = [
 		// Desktop notification time out (seconds)
 		'isw_notification_timeout' 	=> 10,
 		// Sound notification flag
-		'isw_notification_sound' 	=>  false,
+		'isw_notification_sound' 	=> false,
 
 		// ------------------------------------------------------------------------------------------------------
+
+		// refresh interval
+		'isw_refresh_interval'		=> 'default',
+		// check all folders
+		'isw_check_all_folders' 	=> 'default',
 
 		// Additional RoundCube configuration parameters. When switching to the matching identity,
 		// all parameters which were specified here or in config.inc.php will be handled by identity_switch.
@@ -83,7 +86,6 @@ $config['identity_switch.config'] = [
 		// 'isw_imap_port'			=> '',
 		'isw_imap_user' 			=> 'default',
 		'isw_imap_pass' 			=> 'default',
-		'isw_imap_auth_pw'			=> 'default',
 		'isw_imap_auth_type'		=> 'default',
 		'isw_imap_skip_deleted'		=> 'default',
 		'isw_imap_force_caps'		=> 'default',
@@ -107,7 +109,6 @@ $config['identity_switch.config'] = [
 		'isw_smtp_user' 			=> 'default',
 		'isw_smtp_pass' 			=> 'default',
 		'isw_smtp_auth_cid'			=> 'default',
-		'isw_smtp_auth_pw'	 		=> 'default',
 		'isw_smtp_auth_type'	 	=> 'default',
 		'isw_smtp_helo_host'		=> 'default',
 		'isw_smtp_timeout'			=> 'default',
@@ -116,7 +117,7 @@ $config['identity_switch.config'] = [
 		'isw_gssapi_cn'				=> null,
 
 		// Some OAUTH settings used during sending e-mail initialization
-		// This is not in place - see issue #78
+		// This is only prepared - see issue #78
 
 		/*
 		'isw_oauth_provider' 		=> 'default',
@@ -152,15 +153,15 @@ $config['identity_switch.config'] = [
 
 	// Catch domain part of e-mail setting
 	// 'domain.tld' => [
-	//		'imap_host' 			=> 'ssL://imap.another.tld:993',
-	//		'smtp_host' 			=> 'tls://smtp.another.tld:465',
-	//		'refresh_interval' 		=> 1000,
+	//		'isw_imap_host' 		=> 'ssL://imap.another.tld:993',
+	//		'isw_smtp_host' 		=> 'tls://smtp.another.tld:465',
+	//		'isw_refresh_interval' 	=> 1000,
 	// ],
 
 	// Catch specific e-mail settings
 	// 'admin@example.net' 			=> [
-	//		'imap_user'				=> 'Captain',
-	//		'imap_pass'				=> 'stavrosmuellerbeta',
+	//		'isw_imap_user'			=> 'Captain',
+	//		'isw_imap_pass'			=> 'stavrosmuellerbeta',
 	// ],
 
 ];

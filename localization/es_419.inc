@@ -10,6 +10,7 @@ declare(strict_types=1);
 $labels = [];
 
 $labels['isw.common.label'] = 'Nombre de la identidad en el cuadro de selección';
+$labels['idsw.common.noedit'] = 'La información de identidad no puede introducirse hasta que el registro haya sido guardado por primera vez';
 $labels['isw.notify.caption'] = 'Nuevos mensajes';
 $labels['isw.notify.basic'] = 'Mostrar notificaciones del navegador para nuevos mensajes';
 $labels['isw.notify.desktop'] = 'Mostrar notificaciones de escritorio para nuevos mensajes';
@@ -25,3 +26,26 @@ $labels['isw.notify.err.autoplay'] = 'No se puede reproducir el archivo de sonid
 					'Por favor, verifica la configuración de "Reproducción automática" de esta página en tu navegador.';
 $labels['isw.notify.err.notification'] = 'No se puede enviar la notificación!'."\r\n".
 					'Por favor, verifica la configuración de "Notificaciones" de esta página en tu navegador.';
+
+$labels['idsw.imap.caption'] = 'IMAP';
+$labels['idsw.imap.user'] = 'Nombre de usuario';
+$labels['idsw.imap.pass'] = 'Contraseña';
+$labels['idsw.imap.host'] = 'Hostname del servidor';
+$labels['idsw.imap.port'] = 'Puerto';
+$labels['idsw.imap.auth'] = 'Encriptación';
+$labels['idsw.imap.auth.none'] = 'Ninguna';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
+$labels['idsw.imap.delim'] = 'Delimitador de jerarquía de carpetas';
+
+$labels['idsw.smtp.caption'] = 'SMTP';
+$labels['idsw.smtp.user'] = 'Nombre de usuario';
+$labels['idsw.smtp.pass'] = 'Contraseña';
+$labels['idsw.smtp.host'] = 'Hostname del servidor';
+$labels['idsw.smtp.tls'] = 'Conexión segura (TLS)';
+$labels['idsw.smtp.port'] = 'Puerto';
+$labels['idsw.smtp.auth'] = 'Encriptación';
+$labels['idsw.smtp.auth.none'] = 'Ninguna';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';
+

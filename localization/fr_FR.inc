@@ -10,6 +10,7 @@ declare(strict_types=1);
 $labels = [];
 
 $labels['isw.common.label'] = 'Nom de l\'identité dans la liste déroulante';
+$labels['idsw.common.noedit'] = 'Les informations liées à l\'identité ne peuvent être saisies qu\'après le premier enregistrement';
 $labels['isw.notify.caption'] = 'Nouveaux messages';
 $labels['isw.notify.basic'] = 'Afficher les notifications du navigateur en cas de nouveau message';
 $labels['isw.notify.desktop'] = 'Afficher les notifications sur le bureau en cas de nouveau message';
@@ -26,3 +27,24 @@ $labels['isw.notify.err.autoplay'] = 'Le fichier son ne peut pas être joué !'.
 $labels['isw.notify.err.notification'] = 'La notification ne peut être envoyée !'."\r\n".
 						'Vérifier vos paramètres "Notification"  pour cette page de votre navigateur.';
 
+$labels['idsw.imap.caption'] = 'IMAP';
+$labels['idsw.imap.user'] = 'Nom d\'utilisateur';
+$labels['idsw.imap.pass'] = 'Mot de passe';
+$labels['idsw.imap.host'] = 'Nom du serveur IMAP';
+$labels['idsw.imap.port'] = 'Port IMAP';
+$labels['idsw.imap.auth'] = 'Chiffrement';
+$labels['idsw.imap.auth.none'] = 'None';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
+$labels['idsw.imap.delim'] = 'Séparateur de dossier';
+
+$labels['idsw.smtp.caption'] = 'SMTP';
+$labels['idsw.smtp.user'] = 'Nom d\'utilisateur';
+$labels['idsw.smtp.pass'] = 'Mot de passe';
+$labels['idsw.smtp.host'] = 'Nom du serveur SMTP';
+$labels['idsw.smtp.tls'] = 'Connexion sécurisée (TLS)';
+$labels['idsw.smtp.port'] = 'Port SMTP';
+$labels['idsw.smtp.auth'] = 'Encryption';
+$labels['idsw.smtp.auth.none'] = 'None';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';

@@ -1,5 +1,13 @@
 # Changelog identity switch plugin
 
+## Release 3.0.16
+
+* Pull request from CodeShakingSheep merged: Updated language files 
+* Added typechecking for identity_switch_cfg::get() and identity_switch_cfg::set()
+* Fixed testing notification error
+* 'isw_smtp_auth_pw' removed
+* Vixed some documentation errors in default.inc.php
+
 ## Release 3.0.15
 
 * Top menu has now a relativ width

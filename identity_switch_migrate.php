@@ -8,19 +8,17 @@ declare(strict_types=1);
  * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
+#define('INSTALL_PATH', realpath(__DIR__.'/../..') . '/');
+require_once realpath($_SERVER['DOCUMENT_ROOT'].'/..') . '/program/include/iniset.php';
+require_once \INSTALL_PATH.'plugins/identity_switch/identity_switch_cfg.php';
+
 class identity_switch_migrate extends identity_switch_cfg
 {
 
 	public function __construct()
 	{
 		$rc = rcmail::get_instance();
-
-		// Already migrated?
-		$sql = 'SELECT * FROM '.$rc->db->table_name('identities', true).
-			   ' WHERE `identity_switch_prefs` IS NOT NULL LIMIT 1';
-		$q = $rc->db->query($sql);
-		if ($rc->db->fetch_assoc($q))
-			return;
+		$fd = 0;
 
 		$sql = 'SELECT * FROM '.$rc->db->table_name('identity_switch', true);
 		$q = $rc->db->query($sql);
@@ -28,6 +26,9 @@ class identity_switch_migrate extends identity_switch_cfg
 		{
 			if (!$r['flags'])
 				continue;
+
+			$fd++;
+			echo '<p>Migrating identity "'.$r['label'].'"...</p>';
 
 			$imap_ssl = '';
 			if ($r['flags'] & 0x0004)
@@ -69,7 +70,11 @@ class identity_switch_migrate extends identity_switch_cfg
 		}
 
 		// delete table
+		echo '<p>Trying to delete table "identity_switch"...</p>';
 		$rc->db->query('DROP TABLE '.$rc->db->table_name('identity_switch'));
-    }
+
+		echo '<p>'.$fd.' identities successfully migrated.</p>';
+	}
 
 }
+new identity_switch_migrate();

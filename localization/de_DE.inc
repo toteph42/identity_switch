@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 $labels = [];
 
+$labels['idsw.common.noedit'] = 'Informationen zur Identität können vor dem ersten Speichern nicht eingegeben werden';
 $labels['isw.common.label'] = 'Name der Identität im Auswahlmenü';
 $labels['isw.notify.caption'] = 'Neue Nachrichten';
 $labels['isw.notify.basic'] = 'Benachrichtigung im Browser bei neuer Nachricht';
@@ -25,3 +26,26 @@ $labels['isw.notify.err.autoplay'] = 'Kann Musik nicht abspielen!'."\r\n".
 					 'Bitte überprüfen Sie die Einstellungen der "Automatische Wiedergabe" für diese Seite in Ihrem Browser.';
 $labels['isw.notify.err.notification'] = 'Kann Benachrichtigung nicht senden!.'."\r\n".
 					 'Bitte überprüfen Sie die Einstellungen der "Benachrichtigungen" für diese Seite in Ihrem Browser.';
+
+$labels['idsw.imap.caption'] = 'IMAP';
+$labels['idsw.imap.user'] = 'Benutzername';
+$labels['idsw.imap.pass'] = 'Passwort';
+$labels['idsw.imap.host'] = 'Servername';
+$labels['idsw.imap.auth'] = 'Verschlüsselung';
+$labels['idsw.imap.auth.none'] = 'Keine';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
+$labels['idsw.imap.port'] = 'Port';
+$labels['idsw.imap.delim'] = 'Verzeichnistrenner';
+
+$labels['idsw.smtp.caption'] = 'SMTP';
+$labels['idsw.smtp.user'] = 'Benutzername';
+$labels['idsw.smtp.pass'] = 'Passwort';
+$labels['idsw.smtp.host'] = 'Servername';
+$labels['idsw.smtp.tls'] = 'Sichere Verbindung (TLS)';
+$labels['idsw.smtp.port'] = 'Port';
+$labels['idsw.smtp.auth'] = 'Verschlüsselung';
+$labels['idsw.smtp.auth.none'] = 'Keine';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';
+
