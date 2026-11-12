@@ -113,13 +113,8 @@ $config['identity_switch.config'] = [
 		'isw_smtp_helo_host'		=> 'default',
 		'isw_smtp_timeout'			=> 'default',
 		'isw_smtp_conn_options'		=> 'default',
-		'isw_gssapi_context'		=> null,
-		'isw_gssapi_cn'				=> null,
-
-		// Some OAUTH settings used during sending e-mail initialization
-		// This is only prepared - see issue #78
-
-		/*
+		'isw_gssapi_context'		=> 'default',
+		'isw_gssapi_cn'				=> 'default',
 		'isw_oauth_provider' 		=> 'default',
 		'isw_oauth_provider_name' 	=> 'default',
 		'isw_oauth_client_id' 		=> 'default',
@@ -143,7 +138,6 @@ $config['identity_switch.config'] = [
 		'isw_oauth_user_create_map' => 'default',
 		'isw_oauth_password_claim'	=> 'default',
 		'isw_oauth_auth_type' 		=> 'default',
-		*/
 	],
 
 	// ---------------------------------------------------------------------------------------------------------------

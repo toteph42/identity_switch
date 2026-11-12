@@ -334,6 +334,7 @@ class identity_switch extends identity_switch_cfg
 	 */
 	function on_oauth(array $args): array
 	{
+//		self::write_log(__FILE__, __LINE__, self::LVL_ERROR, var_dump($args, true));
 		return $args;
 	}
 

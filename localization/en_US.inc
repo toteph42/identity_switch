@@ -32,10 +32,10 @@ $labels['idsw.imap.user'] = 'Username';
 $labels['idsw.imap.pwd'] = 'Password';
 $labels['idsw.imap.host'] = 'Server hostname';
 $labels['idsw.imap.port'] = 'Port';
-$labels['idsw.imap.auth'] = 'Encryption';
-$labels['idsw.imap.auth.none'] = 'None';
-$labels['idsw.imap.auth.ssl'] = 'SSL';
-$labels['idsw.imap.auth.tls'] = 'TLS';
+$labels['idsw.imap.pass'] = 'Encryption';
+$labels['idsw.imap.pass.none'] = 'None';
+$labels['idsw.imap.pass.ssl'] = 'SSL';
+$labels['idsw.imap.pass.tls'] = 'TLS';
 $labels['idsw.imap.delim'] = 'Folder hierarchy delimiter';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
@@ -44,8 +44,8 @@ $labels['idsw.smtp.pwd'] = 'Password';
 $labels['idsw.smtp.host'] = 'Server hostname';
 $labels['idsw.smtp.tls'] = 'Secure connection (TLS)';
 $labels['idsw.smtp.port'] = 'Port';
-$labels['idsw.smtp.auth'] = 'Encryption';
-$labels['idsw.smtp.auth.none'] = 'None';
-$labels['idsw.smtp.auth.ssl'] = 'SSL';
-$labels['idsw.smtp.auth.tls'] = 'TLS';
+$labels['idsw.smtp.pass'] = 'Encryption';
+$labels['idsw.smtp.pass.none'] = 'None';
+$labels['idsw.smtp.pass.ssl'] = 'SSL';
+$labels['idsw.smtp.pass.tls'] = 'TLS';
 

@@ -124,7 +124,7 @@ class identity_switch_prefs extends rcube_plugin
 										   'type' => 'password', 'maxlength' => 128 ],
 					'isw_imap_host'	 	=> [ 'label' => $this->gettext('idsw.imap.host'),
 										   'type'  => 'text', 'maxlength' => 64 ],
-					'isw_imap_auth' 	=> [ 'label' => $this->gettext('idsw.imap.auth'),
+					'isw_imap_ssl' 		=> [ 'label' => $this->gettext('idsw.imap.ssl'),
 										   'value' => $authImap->show($rec['isw_imap_ssl']) ],
 					'isw_imap_port' 	=> [ 'label' => $this->gettext('idsw.imap.port'),
 										   'type' => 'text', 'maxlength' => 5 ],
@@ -153,7 +153,7 @@ class identity_switch_prefs extends rcube_plugin
 										   'type' => 'password', 'maxlength' => 128 ],
 		        	'isw_smtp_host'	 	=> [ 'label' => $this->gettext('idsw.smtp.host'),
 										   'type' => 'text', 'maxlength' => 64 ],
-					'isw_smtp_auth' 	=> [ 'label' => $this->gettext('idsw.smtp.auth'),
+					'isw_smtp_ssl' 		=> [ 'label' => $this->gettext('idsw.smtp.ssl'),
 										   'value' => $authSmtp->show($rec['isw_smtp_ssl']) ],
 		        	'isw_smtp_port' 	=> [ 'label' => $this->gettext('idsw.smtp.port'),
 										   'type' => 'text', 'maxlength' => 5 ],
@@ -227,7 +227,7 @@ class identity_switch_prefs extends rcube_plugin
 		$str = '';
 
 		// hide internal parameters
-	    if (substr($key, 0, 1) == '_' || $key == 'isw_label')
+	    if (substr($key, 0, 1) == '_' || $key == 'isw_label' || substr($key, 0, 4) == 'cfg_')
 	        return $str;
 
 		if (is_array($val))
@@ -341,12 +341,14 @@ class identity_switch_prefs extends rcube_plugin
 				foreach ([ 'isw_imap_user',
 						   'isw_imap_pass',
 						   'isw_imap_host',
+						   'isw_imap_ssl',
 						   'isw_imap_port',
 						   'isw_imap_delim',
 						   'isw_smtp_user',
 						   'isw_smtp_pass',
 						   'isw_smtp_host',
-						   'isw_smtp_port',
+						   'isw_smtp_ssl',
+							'isw_smtp_port',
 						   'isw_notification_timeout' ] as $k)
 				{
 					$v = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
