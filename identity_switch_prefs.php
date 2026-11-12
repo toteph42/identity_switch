@@ -118,26 +118,26 @@ class identity_switch_prefs extends rcube_plugin
 			$args['form']['imap'] = [
 				'name' 	  => $this->gettext('idsw.imap.caption'),
 				'content' => [
-					'isw_imap_user' 	=> [ 'label' => $this->gettext('idsw.imap.user'),
-										   'type' => 'text', 'maxlength' => 64 ],
-					'isw_imap_pass' 	=> [ 'label' => $this->gettext('idsw.imap.pass'),
-										   'type' => 'password', 'maxlength' => 128 ],
-					'isw_imap_host'	 	=> [ 'label' => $this->gettext('idsw.imap.host'),
-										   'type'  => 'text', 'maxlength' => 64 ],
-					'isw_imap_ssl' 		=> [ 'label' => $this->gettext('idsw.imap.ssl'),
-										   'value' => $authImap->show($rec['isw_imap_ssl']) ],
-					'isw_imap_port' 	=> [ 'label' => $this->gettext('idsw.imap.port'),
-										   'type' => 'text', 'maxlength' => 5 ],
-					'isw_imap_delim'	=> [ 'label' => $this->gettext('idsw.imap.delim'),
-									  	   'type' => 'text', 'maxlength' => 1 ],
+					'isw_imap_user' 		=> [ 'label' => $this->gettext('idsw.imap.user'),
+											   'type' => 'text', 'maxlength' => 64 ],
+					'isw_imap_pass' 		=> [ 'label' => $this->gettext('idsw.imap.pass'),
+											   'type' => 'password', 'maxlength' => 128 ],
+					'isw_imap_host'	 		=> [ 'label' => $this->gettext('idsw.imap.host'),
+											   'type'  => 'text', 'maxlength' => 64 ],
+					'isw_imap_ssl' 			=> [ 'label' => $this->gettext('idsw.imap.ssl'),
+											   'value' => $authImap->show($rec['isw_imap_ssl']) ],
+					'isw_imap_port' 		=> [ 'label' => $this->gettext('idsw.imap.port'),
+										  	   'type' => 'text', 'maxlength' => 5 ],
+					'isw_imap_delimiter'	=> [ 'label' => $this->gettext('idsw.imap.delimiter'),
+									  		   'type' => 'text', 'maxlength' => 1 ],
 				],
 			];
-			$args['record']['isw_imap_user'] 	= $rec['isw_imap_user'];
-	        $args['record']['isw_imap_pass']  	= strlen($rec['isw_imap_pass']) ?
-	        								  	  rcmail::get_instance()->decrypt($rec['isw_imap_pass']) : '';
-			$args['record']['isw_imap_host'] 	= $rec['isw_imap_host'];
-	        $args['record']['isw_imap_port'] 	= $rec['isw_imap_port'];
-	        $args['record']['isw_imap_delim'] 	= $rec['isw_imap_delimiter'];
+			$args['record']['isw_imap_user'] 		= $rec['isw_imap_user'];
+	        $args['record']['isw_imap_pass']  		= strlen($rec['isw_imap_pass']) ?
+	        								  		  rcmail::get_instance()->decrypt($rec['isw_imap_pass']) : '';
+			$args['record']['isw_imap_host'] 		= $rec['isw_imap_host'];
+	        $args['record']['isw_imap_port'] 		= $rec['isw_imap_port'];
+	        $args['record']['isw_imap_delimiter'] 	= $rec['isw_imap_delimiter'];
 
 			$authSmtp = new html_select([ 'name' => "_isw_smtp_auth" ]);
 			$authSmtp->add($this->gettext('idsw.smtp.auth.none'), 'none');
@@ -343,12 +343,12 @@ class identity_switch_prefs extends rcube_plugin
 						   'isw_imap_host',
 						   'isw_imap_ssl',
 						   'isw_imap_port',
-						   'isw_imap_delim',
+						   'isw_imap_delimiter',
 						   'isw_smtp_user',
 						   'isw_smtp_pass',
 						   'isw_smtp_host',
 						   'isw_smtp_ssl',
-							'isw_smtp_port',
+						   'isw_smtp_port',
 						   'isw_notification_timeout' ] as $k)
 				{
 					$v = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);

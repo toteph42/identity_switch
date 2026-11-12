@@ -36,7 +36,7 @@ $labels['idsw.imap.pass'] = 'Titkosítás';
 $labels['idsw.imap.pass.none'] = 'Nincs';
 $labels['idsw.imap.pass.ssl'] = 'SSL';
 $labels['idsw.imap.pass.tls'] = 'TLS';
-$labels['idsw.imap.delim'] = 'Mappahierarchia elválasztó';
+$labels['idsw.imap.delimiter'] = 'Mappahierarchia elválasztó';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
 $labels['idsw.smtp.user'] = 'Felhasználónév';

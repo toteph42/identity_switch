@@ -115,6 +115,7 @@ $config['identity_switch.config'] = [
 		'isw_smtp_conn_options'		=> 'default',
 		'isw_gssapi_context'		=> 'default',
 		'isw_gssapi_cn'				=> 'default',
+
 		'isw_oauth_provider' 		=> 'default',
 		'isw_oauth_provider_name' 	=> 'default',
 		'isw_oauth_client_id' 		=> 'default',

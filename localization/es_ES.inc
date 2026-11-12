@@ -36,7 +36,7 @@ $labels['idsw.imap.pass'] = 'Cifrado';
 $labels['idsw.imap.pass.none'] = 'Ninguno';
 $labels['idsw.imap.pass.ssl'] = 'SSL';
 $labels['idsw.imap.pass.tls'] = 'TLS';
-$labels['idsw.imap.delim'] = 'Delimitador de jerarquía de carpetas';
+$labels['idsw.imap.delimiter'] = 'Delimitador de jerarquía de carpetas';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
 $labels['idsw.smtp.user'] = 'Nombre de usuario';

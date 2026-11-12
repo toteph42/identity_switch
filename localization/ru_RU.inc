@@ -36,7 +36,7 @@ $labels['idsw.imap.pass'] = 'Шифрование';
 $labels['idsw.imap.pass.none'] = 'Нет';
 $labels['idsw.imap.pass.ssl'] = 'SSL';
 $labels['idsw.imap.pass.tls'] = 'TLS';
-$labels['idsw.imap.delim'] = 'Разделитель папок';
+$labels['idsw.imap.delimiter'] = 'Разделитель папок';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
 $labels['idsw.smtp.user'] = 'Имя пользователя';

@@ -1,9 +1,13 @@
 # Changelog identity switch plugin
 
+## Release 3.0.18
+
+* Bug in saving 'isw_imap_delimiter' in simple view
+
 ## Release 3.0.17
 
 * Removed 'cfg_' parameter from expert mode
-* Save 'isw_imap_ssl' in simple view
+* Bug in saving 'isw_imap_ssl' in simple view
 
 ## Release 3.0.16
 

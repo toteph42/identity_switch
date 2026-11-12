@@ -64,7 +64,6 @@ class identity_switch extends identity_switch_cfg
 		$this->add_hook('template_object_composeheaders', [ $this, 'on_object_composeheaders' ]);
 		$this->add_hook('storage_connect', 				  [ $this, 'on_storage_connect' ]);
 		$this->add_hook('smtp_connect', 				  [ $this, 'on_smtp_connect' ]);
-		$this->add_hook('oauth_login', 				  	  [ $this, 'on_oauth' ]);
 		$this->add_hook('ready', 			  			  [ $this, 'check_flag' ]);
 
 		// register our own action handler
@@ -323,18 +322,6 @@ class identity_switch extends identity_switch_cfg
 								  ($typ ? (array)$rec[$int] : $rec[$int]);
 		}
 
-		return $args;
-	}
-
-	/**
-	 * 	Login with Oauth
-	 *
-	 * 	@param array $args
-	 * 	@return array
-	 */
-	function on_oauth(array $args): array
-	{
-//		self::write_log(__FILE__, __LINE__, self::LVL_ERROR, var_dump($args, true));
 		return $args;
 	}
 
