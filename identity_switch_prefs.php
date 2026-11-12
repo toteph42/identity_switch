@@ -110,10 +110,10 @@ class identity_switch_prefs extends rcube_plugin
 
 	    switch ($typ = identity_switch_cfg::get('cfg', 'typ')) {
 		case 1: 												// simple view
-			$authImap = new html_select([ 'name' => "_isw_imap_auth" ]);
-			$authImap->add($this->gettext('idsw.imap.auth.none'), 'none');
-			$authImap->add($this->gettext('idsw.imap.auth.ssl'), 'ssl');
-			$authImap->add($this->gettext('idsw.imap.auth.tls'), 'tls');
+			$authImap = new html_select([ 'name' => "_isw_imap_ssl" ]);
+			$authImap->add($this->gettext('idsw.imap.ssl.none'), 'none');
+			$authImap->add($this->gettext('idsw.imap.ssl.ssl'), 'ssl');
+			$authImap->add($this->gettext('idsw.imap.ssl.tls'), 'tls');
 
 			$args['form']['imap'] = [
 				'name' 	  => $this->gettext('idsw.imap.caption'),
@@ -139,10 +139,10 @@ class identity_switch_prefs extends rcube_plugin
 	        $args['record']['isw_imap_port'] 		= $rec['isw_imap_port'];
 	        $args['record']['isw_imap_delimiter'] 	= $rec['isw_imap_delimiter'];
 
-			$authSmtp = new html_select([ 'name' => "_isw_smtp_auth" ]);
-			$authSmtp->add($this->gettext('idsw.smtp.auth.none'), 'none');
-			$authSmtp->add($this->gettext('idsw.smtp.auth.ssl'), 'ssl');
-			$authSmtp->add($this->gettext('idsw.smtp.auth.tls'), 'tls');
+			$authSmtp = new html_select([ 'name' => "_isw_smtp_ssl" ]);
+			$authSmtp->add($this->gettext('idsw.smtp.ssl.none'), 'none');
+			$authSmtp->add($this->gettext('idsw.smtp.ssl.ssl'), 'ssl');
+			$authSmtp->add($this->gettext('idsw.smtp.ssl.tls'), 'tls');
 
 			$args['form']['smtp'] = [
 				'name' 	  => $this->gettext('idsw.smtp.caption'),
