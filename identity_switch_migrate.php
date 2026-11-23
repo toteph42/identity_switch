@@ -5,7 +5,7 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 #define('INSTALL_PATH', realpath(__DIR__.'/../..') . '/');
@@ -30,17 +30,17 @@ class identity_switch_migrate extends identity_switch_cfg
 			$fd++;
 			echo '<p>Migrating identity "'.$r['label'].'"...</p>';
 
-			$imap_ssl = '';
+			$imapauth = '';
 			if ($r['flags'] & 0x0004)
-				$imap_ssl = 'ssl';
+				$imapauth = 'ssl';
 			if ($r['flags'] & 0x0008)
-				$imap_ssl = 'tsl';
+				$imapauth = 'tsl';
 
-			$smtp_ssl = '';
+			$smtpauth = '';
 			if ($r['flags'] & 0x0010)
-				$smtp_ssl = 'ssl';
+				$smtpauth = 'ssl';
 			if ($r['flags'] & 0x0020)
-				$smtp_ssl = 'tsl';
+				$smtpauth = 'tsl';
 
 			foreach ([ 'isw_label'					=> $r['label'],
 					   'isw_notification_basic' 	=> ($r['flags'] & 0x0100 ? true : false),
@@ -52,12 +52,12 @@ class identity_switch_migrate extends identity_switch_cfg
 					   'isw_imap_delimiter'			=> $r['imap_delim'],
 					   'isw_imap_host'				=> $r['imap_host'],
 					   'isw_imap_port'				=> $r['imap_port'],
-					   'isw_imap_ssl'				=> $imap_ssl,
+					   'isw_imapauth'				=> $imapauth,
 					   'isw_imap_user'				=> $r['imap_user'],
 					   'isw_imap_pass'				=> $r['imap_pwd'],
 					   'isw_smtp_host'				=> $r['smtp_host'],
 					   'isw_smtp_port'				=> $r['smtp_port'],
-					   'isw_smtp_ssl'				=> $smtp_ssl,
+					   'isw_smtpauth'				=> $smtpauth,
 					   'isw_smtp_user'				=> $r['smtp_user'],
 					   'isw_smtp_pass'				=> $r['smtp_pwd'],
 					 ] as $k => $v)

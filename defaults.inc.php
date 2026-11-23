@@ -3,7 +3,7 @@
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 $config['identity_switch.config'] = [
@@ -42,10 +42,8 @@ $config['identity_switch.config'] = [
 		// 2= Complex view
 		'cfg_typ'					=> 1,
 
-		// debug IMAP connections for all identities
-		'cfg_imap_debug'			=> false,
-		// debug SMTP connections for all identities - not supported on identity level
-		// 'cfg_smtp_debug'			=> false,
+		// Backend to use for caching. Can either be 'db' (default), 'redis', 'memcache', or 'php'
+		'cfg_cache'					=> 'db',
 
 		// ------------------------------------------------------------------------------------------------------
 
@@ -82,7 +80,7 @@ $config['identity_switch.config'] = [
 
 		'isw_imap_host'				=> 'default',
 		// The folowing parameter will be extracted from isw_imap_host automatically:
-		// 'isw_imap_ssl'			=> '',
+		// 'isw_imap_auth'			=> '',
 		// 'isw_imap_port'			=> '',
 		'isw_imap_user' 			=> 'default',
 		'isw_imap_pass' 			=> 'default',
@@ -99,12 +97,14 @@ $config['identity_switch.config'] = [
 		'isw_imap_attempt'			=> 1,
 		'isw_imap_retry'			=> false,
 		'isw_imap_delimiter'		=> 'default',
+		'isw_imap_language'			=> 'default',
+		'isw_imap_debug'			=> 'default',
 
 		// Some SMTP settings used during sending e-mail initialization
 
 		'isw_smtp_host'				=> 'default',
 		// The folowing parameter will be extracted from isw_smtp_host automatically:
-		// 'isw_smtp_ssl'			=> '',
+		// 'isw_smtp_auth'			=> '',
 		// 'isw_smtp_port'			=> '',
 		'isw_smtp_user' 			=> 'default',
 		'isw_smtp_pass' 			=> 'default',
@@ -113,9 +113,11 @@ $config['identity_switch.config'] = [
 		'isw_smtp_helo_host'		=> 'default',
 		'isw_smtp_timeout'			=> 'default',
 		'isw_smtp_conn_options'		=> 'default',
-		'isw_gssapi_context'		=> 'default',
-		'isw_gssapi_cn'				=> 'default',
+		'isw_smtp_gssapi_context'	=> 'default',
+		'isw_smtp_gssapi_cn'		=> 'default',
 
+		// If you want to use OAuth, please copy the following section to your 'config.inc.php' and set 'cfg_typ' = 2.
+		/*
 		'isw_oauth_provider' 		=> 'default',
 		'isw_oauth_provider_name' 	=> 'default',
 		'isw_oauth_client_id' 		=> 'default',
@@ -139,6 +141,7 @@ $config['identity_switch.config'] = [
 		'isw_oauth_user_create_map' => 'default',
 		'isw_oauth_password_claim'	=> 'default',
 		'isw_oauth_auth_type' 		=> 'default',
+		*/
 	],
 
 	// ---------------------------------------------------------------------------------------------------------------
@@ -147,16 +150,50 @@ $config['identity_switch.config'] = [
  	// Appropriate set of values is searched by mapping domain of e-mail (from identity) to e-mail.
 
 	// Catch domain part of e-mail setting
+	//
 	// 'domain.tld' => [
-	//		'isw_imap_host' 		=> 'ssL://imap.another.tld:993',
-	//		'isw_smtp_host' 		=> 'tls://smtp.another.tld:465',
-	//		'isw_refresh_interval' 	=> 1000,
+	//		'isw_imap_host' 			=> 'ssL://imap.another.tld:993',
+	//		'isw_smtp_host' 			=> 'tls://smtp.another.tld:465',
+	//		'isw_refresh_interval' 		=> 1000,
+	// ],
+
+	// OAUth sample connection to Gmail
+	//
+	// 'gmail.com' => [
+	//		'cfg_typ'					=> 2,
+	//
+	// 		'isw_oauth_provider' 		=> 'google',
+	//		'isw_oauth_provider_name' 	=> 'Google',
+	//		'isw_oauth_client_id' 		=> 'YOUR-CLIENT-ID.apps.googleusercontent.com',
+	//		'isw_oauth_client_secret'	=> 'YOUR-SECRET',
+	//		'isw_oauth_config_uri' 		=> 'https://accounts.google.com/.well-known/openid-configuration',
+	//		'isw_oauth_scope' 			=> 'email profile openid https://mail.google.com/',
+	//		'isw_oauth_auth_parameters' => [ 'access_type' => 'offline', 'prompt' => 'consent' ],
+	//		'isw_oauth_identity_fields' => [ 'email' ],
+	//		'isw_oauth_login_redirect' 	=> false,
+	//		'isw_oauth_cache' 			=> 'db',
+	//
+	//		'isw_imap_host' 			=> 'imap.gmail.com',
+	//		'isw_imap_auth'				=> 'ssl',
+	//		'isw_imap_port'				=> '993',
+	//		'isw_imap_auth_type'		=> 'XOAUTH2',
+	//		'isw_imap_user' 			=> 'YOUR-USER-ID',
+	//		'isw_imap_pass'				=> 'YOUR-PASSWORD',
+	//
+	//		'isw_smtp_user' 			=> '%u',
+	//		'isw_smtp_pass'				=> '%p',
+	//		'isw_smtp_host' 			=> 'smtp.gmail.com',
+	//		'isw_smtp_auth'				=> 'ssl',
+	//		'isw_smtp_port'				=> '587',
+	//		'isw_smtp_auth_type'		=> 'XOAUTH2',
+	//
 	// ],
 
 	// Catch specific e-mail settings
-	// 'admin@example.net' 			=> [
-	//		'isw_imap_user'			=> 'Captain',
-	//		'isw_imap_pass'			=> 'stavrosmuellerbeta',
+	//
+	// 'admin@example.net' 				=> [
+	//		'isw_imap_user'				=> 'YOUR-USER-ID',
+	//		'isw_imap_pass'				=> 'YOUR-PASSWORD',
 	// ],
 
 ];

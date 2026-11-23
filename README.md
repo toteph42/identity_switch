@@ -60,15 +60,16 @@ This plugin only supports `Elastic` skin. If you wan't to get another skin to be
 
 ### License ###
 
-This plugin is released under the [GNU General Public License v3.0].
+This plugin is released under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 ### Migration ###
 
-If you want to migrate plugin data from version 2.x, there is a small PHP script available. This can be called by entering`[URL]/plugin/identity_switch/idnetity_switch_migrate.php` in you favorite browser. You should then see at least two messages:
+If you want to migrate plugin data from version 2.x, there is a small PHP script available. This can be called by entering`[URL]/plugin/identity_switch/identity_switch_migrate.php` in you favorite browser. You should then see at least two messages:
 
-`Trying to delete table "identity_switch"...`
-
-`0 identities successfully migrated.`
+```
+Trying to delete table "identity_switch"...
+0 identities successfully migrated.
+```
 
 ### Debugging ###
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 $labels = [];
 
@@ -32,10 +32,10 @@ $labels['idsw.imap.user'] = 'Nom d\'utilisateur';
 $labels['idsw.imap.pass'] = 'Mot de passe';
 $labels['idsw.imap.host'] = 'Nom du serveur IMAP';
 $labels['idsw.imap.port'] = 'Port IMAP';
-$labels['idsw.imap.ssl'] = 'Chiffrement';
-$labels['idsw.imap.ssl.none'] = 'None';
-$labels['idsw.imap.ssl.ssl'] = 'SSL';
-$labels['idsw.imap.ssl.tls'] = 'TLS';
+$labels['idsw.imap.auth'] = 'Chiffrement';
+$labels['idsw.imap.auth.none'] = 'None';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
 $labels['idsw.imap.delimiter'] = 'Séparateur de dossier';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
@@ -44,7 +44,7 @@ $labels['idsw.smtp.pass'] = 'Mot de passe';
 $labels['idsw.smtp.host'] = 'Nom du serveur SMTP';
 $labels['idsw.smtp.tls'] = 'Connexion sécurisée (TLS)';
 $labels['idsw.smtp.port'] = 'Port SMTP';
-$labels['idsw.smtp.ssl'] = 'Encryption';
-$labels['idsw.smtp.ssl.none'] = 'None';
-$labels['idsw.smtp.ssl.ssl'] = 'SSL';
-$labels['idsw.smtp.ssl.tls'] = 'TLS';
+$labels['idsw.smtp.auth'] = 'Encryption';
+$labels['idsw.smtp.auth.none'] = 'None';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';

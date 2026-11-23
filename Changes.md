@@ -1,8 +1,34 @@
 # Changelog identity switch plugin
 
+## Release 3.1.0
+
+* Fixed localization problem for english translation
+* 'isw_imap_ssl' renamed to 'isw_imap_auth'
+* 'isw_smtp_ssl' renamed to 'isw_smtp_auth'
+* 'isw_imap_language' added to IMAP connection
+* 'cfg_imap_debug' moved to 'isw_imap_debug' to enable spevific connection debugging
+* '%p' and '%u' will be set dynamically during SMTP connect
+* Socket transport layer 'none' ignored
+* 'isw_resfresh_interval' added to simple dialog
+* Fixed forwarded/replied read/unread message flag bug
+* Covering forward/redply of multiple messages
+* Bug in 'identity_switch_menu' CSS fixed
+* Debug log messages shortned
+* License link error fixed
+* Security fix GHSA-4wgm-cc47-jfqg applied
+* Fixed bug in check_newmail() when no connection is established
+* Lock sheme removed
+* Moved some variables to RoundCube cache to avoid race conditions in ansynchroneous Ajax calls
+*  Thus, parallel requests of different identities never overwrite each other,
+*  and multiple sessions of the same user do not get in each other's way.
+
+## Release 3.0.19
+
+* Fixed localization error
+
 ## Release 3.0.18
 
-* Bug in saving 'isw_imap_delimiter' in simple view
+* Bug fixed in saving 'isw_imap_delimiter' in simple view
 
 ## Release 3.0.17
 

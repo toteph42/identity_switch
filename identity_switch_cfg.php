@@ -5,14 +5,18 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 class identity_switch_cfg extends identity_switch_prefs
 {
 	static protected $config = [];					// configuration array
+    static protected $cache = null;					// cache handler
 
 	const TABLE = 'identity_switch';				// where to store data in $_SESSION
+
+	// special variables stored on RiundCube to cover paralel AJAX-Requests
+	const VOLATILE = [ '_unseen', '_checked', '_notify' ];
 
 	// log levels
 	const LVL_ERROR = 0;
@@ -29,11 +33,10 @@ class identity_switch_cfg extends identity_switch_prefs
 	{
 		parent::init();
 
-		// configuration loaded?
+		// configuration already available?
 		if (isset($_SESSION[self::TABLE]))
 			return;
 
-		// load configuration
 		$rc = rcmail::get_instance();
 
 		// first load default config
@@ -42,6 +45,12 @@ class identity_switch_cfg extends identity_switch_prefs
 		// save global configuration parameters
 		foreach (self::$config as $nam => $set)
 		{
+			if (!is_array($set))
+			{
+				self::write_log(__FILE__, __LINE__, self::LVL_ERROR,
+							   'Only arrays were allowed in "identity_switch.config" - stopping execution');
+				exit();
+			}
 			foreach ($set as $k => $v)
 				if (substr($k, 0, 4) == 'cfg_')
 				{
@@ -66,10 +75,10 @@ class identity_switch_cfg extends identity_switch_prefs
 			   ' FROM '.$rc->db->table_name('identities', true).
 			   ' WHERE `user_id` = ? AND `del` = 0';
 		$q   = $rc->db->query($sql, $rc->user->ID);
-		while ($r = $rc->db->fetch_assoc($q))
-			// skip default identity
-			if ((int)$r['identity_id'] != $iid)
-				self::get_cfg((int)$r['identity_id'], $r['email']);
+		while ($rec = $rc->db->fetch_assoc($q))
+			// skip default identity and alll "non" identiy_switch entries
+			if ((int)$rec['identity_id'] != $iid)
+				self::get_cfg((int)$rec['identity_id'], $rec['email']);
 	}
 
 	/**
@@ -106,8 +115,6 @@ class identity_switch_cfg extends identity_switch_prefs
 			$iid = (int)$r['identity_id'];
 			self::set('cfg', 'iid', $iid);							// save active identity id
 			self::set('cfg', 'default_iid', $iid);					// save default identity
-			self::set('cfg', 'language', $_SESSION['language']);	// save language
-			self::set('cfg', 'lock', false);						// table lock status
 			self::set('cfg', 'init', false);						// initial new mail check performed
 
 			// set the proper default user data
@@ -116,18 +123,44 @@ class identity_switch_cfg extends identity_switch_prefs
 			self::set($iid, 'isw_imap_pass', $_SESSION['password']);
 			self::set($iid, 'isw_imap_host', $_SESSION['storage_host']);
 			self::set($iid, 'isw_imap_port', $_SESSION['storage_port']);
-			self::set($iid, 'isw_imap_ssl', $_SESSION['storage_ssl']);
+			self::set($iid, 'isw_imap_auth', $_SESSION['storage_ssl']);
+			self::set($iid, 'isw_imap_language', '');
+			self::set($iid, 'isw_refresh_interval', $rc->config->get('refresh_interval'));
 		} elseif (!isset(self::$config['*']))
 			self::_load_cfg();
 
 		// load preferences
 		self::load_cfg($iid, $email);
 
-		self::set($iid, '_unseen', 0);								// # of unseen messages
-		self::set($iid, '_notify', false);							// notify user flag
-		self::set($iid, '_checked', 0);								// last time check for new mail
+		$rec = self::get($iid);
 
-		return self::get($iid);
+		// 3.0.20 ->
+		$chg = false;
+		foreach ( [ 'isw_imap_ssl', 'isw_smtp_ssl' ] as $k)
+		{
+			if (isset($rec[$k]))
+			{
+				$k1 = substr($k, 0, 9).'auth';
+				self::set($iid, $k1, $rec[$k1] = $rec[$k]);
+				foreach ([ $k, substr($k, 0, 9).'auth_pw' ] as $k)
+				{
+					self::del($iid, $k);
+					unset($rec[$k]);
+					$chg = true;
+				}
+			}
+		}
+		foreach ([ 'isw_gssapi_context', 'isw_gssapi_cn' ] as $k)
+		{
+			self::del($iid, $k);
+			unset($rec[$k]);
+			$chg = true;
+		}
+		if ($chg)
+			self::save_cfg($iid);
+		// <- 3.0.20
+
+		return $rec;
 	}
 
 	/**
@@ -174,10 +207,11 @@ class identity_switch_cfg extends identity_switch_prefs
 				switch ($k)
 				{
 				case 'isw_imap_host':
-				case 'isw_imap_ssl':
+				case 'isw_imap_auth':
 				case 'isw_imap_port':
 				case 'isw_imap_user':
 				case 'isw_imap_pass':
+				case 'isw_imap_language':
 					$v = self::get($did, $k);
 					break;
 
@@ -187,14 +221,8 @@ class identity_switch_cfg extends identity_switch_prefs
 				}
 			}
 
-			// check for special configuration paraneters
-			if ($k == 'smtp_pass' && $v == '%p')
-				$v = $rc->decrypt(self::get($iid, 'isw_imap_pass'));
-			if ($k == 'smtp_user' && $v == '%u')
-				$v = self::get($iid, 'isw_imap_user');
-
 			// encrypt passwords
-			if (strpos($k, 'pass'))
+			if (strpos($k, 'pass') && $v != '%p')
 				$v = $rc->encrypt($v);
 
 			// split host names
@@ -206,7 +234,7 @@ class identity_switch_cfg extends identity_switch_prefs
 				else
 					$t = [ $v, $rc->config->get($k.'ssl'), $rc->config->get($k.'port') ];
 				self::set($iid, $k.'host', $t[0]);
-				self::set($iid, $k.'ssl', $t[1]);
+				self::set($iid, $k.'auth', $t[1]);
 				self::set($iid, $k.'port', $t[2]);
 			} else
 				self::set($iid, $k, $v);
@@ -215,8 +243,8 @@ class identity_switch_cfg extends identity_switch_prefs
 		// any configuration saved?
 		$sql = ' SELECT `identity_switch_prefs`'.
 			   ' FROM '.$rc->db->table_name('identities', true).
-			   ' WHERE `identity_id` = ?';
-		$q   = $rc->db->query($sql, $iid);
+			   ' WHERE `identity_id` = ? AND `user_id` = ?';
+		$q   = $rc->db->query($sql, $iid, $rc->user->ID);
 		if (($r = $rc->db->fetch_assoc($q)) && isset($r['identity_switch_prefs']))
 		{
 			$prefs = (array)json_decode($r['identity_switch_prefs']);
@@ -241,7 +269,7 @@ class identity_switch_cfg extends identity_switch_prefs
 
 		$sql = 'UPDATE '.$rc->db->table_name('identities', true).
 			   ' SET `identity_switch_prefs` = ? '.
-			   ' WHERE `identity_id` = ?';
+			   ' WHERE `identity_id` = ? AND `user_id` = ?';
 
 		$prefs = self::get($iid);
 		foreach ($prefs as $k => $v)
@@ -249,7 +277,7 @@ class identity_switch_cfg extends identity_switch_prefs
 			if (substr($k, 0, 1) == '_')
 				unset($prefs[$k]);
 		$v;
-		$q   = $rc->db->query($sql, json_encode($prefs), $iid);
+		$q = $rc->db->query($sql, json_encode($prefs), $iid, $rc->user->ID);
 		if ($rc->db->affected_rows($q) === false)
 			$this->write_log(__FILE__, __LINE__, self::LVL_ERROR, sprintf('%03d', $iid).': Error saving data');
 	}
@@ -275,24 +303,35 @@ class identity_switch_cfg extends identity_switch_prefs
 			return null;
 		}
 
-		// check locking status
-		while (isset($_SESSION[self::TABLE]['cfg']['lock']) && $_SESSION[self::TABLE]['cfg']['lock'])
-			usleep(10);
-
 		// get whole table?
 		if (!$sect && !$var)
 		{
 			if (!isset($_SESSION[self::TABLE]))
 				$_SESSION[self::TABLE] = [];
-			return $_SESSION[self::TABLE];
+
+			$all = $_SESSION[self::TABLE];
+			foreach ($all as $k => $v)
+			{
+				// is it identity?
+				if (is_numeric($k))
+					$all[$k] = array_merge($v, self::cache_read($k));
+			}
+			return $all;
 		}
+
+		// get variable?
+		// special variable?
+		if (in_array($var, self::VOLATILE, true))
+		    return self::cache_read($sect)[$var];
 
 		// get variable?
 		if ($sect && $var && isset($_SESSION[self::TABLE][$sect][$var]))
 			return $_SESSION[self::TABLE][$sect][$var];
+
 		// get section?
 		elseif (isset($_SESSION[self::TABLE][$sect]))
-			return $_SESSION[self::TABLE][$sect];
+		    return is_int($sect) ? array_merge($_SESSION[self::TABLE][$sect], self::cache_read($sect)) :
+		           $_SESSION[self::TABLE][$sect];
 
 		// we should never go here
 		if ($errchk)
@@ -322,15 +361,16 @@ class identity_switch_cfg extends identity_switch_prefs
 			return;
 		}
 
+		// cache special varibales
+		if (in_array($var, self::VOLATILE, true))
+		{
+		    self::cache_write($sect, $var, $val);
+		    return;
+		}
+
 		// table defied?
 		if (!isset($_SESSION[self::TABLE]))
 			$_SESSION[self::TABLE] = [];
-
-		// lock table
-		if (isset($_SESSION[self::TABLE]['cfg']['lock']))
-			while ($_SESSION[self::TABLE]['cfg']['lock'])
-				usleep(10);
-		$_SESSION[self::TABLE]['cfg']['lock'] = true;
 
 		if (is_array($var))
 		{
@@ -340,9 +380,6 @@ class identity_switch_cfg extends identity_switch_prefs
 				$_SESSION[self::TABLE][$sect][$k] = is_null($v) ? $default : $v;
 		} else
 			$_SESSION[self::TABLE][$sect][$var] = $val;
-
-		// unlock table
-		$_SESSION[self::TABLE]['cfg']['lock'] = false;
 	}
 
 	/**
@@ -353,17 +390,61 @@ class identity_switch_cfg extends identity_switch_prefs
 	 */
 	protected function del(string|int|null $sect = null, ?string $var = null): void
 	{
-			// check locking status
-		while (isset($_SESSION[self::TABLE]['cfg']['lock']) && $_SESSION[self::TABLE]['cfg']['lock'])
-			usleep(10);
-
 		if (!$sect && !$var)
 			unset($_SESSION[self::TABLE]);
 
-		if ($sect)
-			unset($_SESSION[self::TABLE][$sect]);
-		else
+		if ($sect && $var)
 			unset($_SESSION[self::TABLE][$sect][$var]);
+		elseif ($sect)
+			unset($_SESSION[self::TABLE][$sect]);
+	}
+
+	/**
+	 * 	Cache key: per browser session and identity.
+ 	 * 	Thus, parallel requests of different identities never overwrite each other,
+	 * 	and multiple sessions of the same user do not get in each other's way.
+	 */
+
+	/**
+	 * 	Return unique key for cache
+	 *
+	 *	@param int $iid
+	 * 	@return string
+	 */
+	protected function cache_key(int $iid): string
+	{
+    	return $iid.'_'.substr(md5(session_id()), 0, 12);
+	}
+
+	/**
+	 * 	Read from cache
+	 *
+	 * 	@param int $iid
+	 * 	@return array
+	 */
+	protected function cache_read(int $iid): array
+	{
+		// allocate cache handler
+		if (!self::$cache)
+	    	self::$cache = rcmail::get_instance()->get_cache('identity_switch', self::get('cfg', 'cache'), 86400, true);
+
+		$v = self::$cache->get(self::cache_key($iid));
+	    return array_merge([ '_unseen' => 0, '_checked' => 0, '_notify' => false ],
+	                       is_array($v) ? $v : [] );
+	}
+
+	/**
+	 * 	Write to cache
+	 *
+	 * 	@param int $iid
+	 * 	@param string $var
+	 * 	@param mixed $val
+	 */
+	protected function cache_write(int $iid, string $var, mixed $val): void
+	{
+	    $v       = $this->cache_read($iid);
+	    $v[$var] = $val;
+	    self::$cache->set($this->cache_key($iid), $v);
 	}
 
 	/**
@@ -393,7 +474,7 @@ class identity_switch_cfg extends identity_switch_prefs
 
 		case self::LVL_DEBUG:
 			if ($_SESSION[self::TABLE]['cfg']['logging'] == 2)
-				rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): Debug: '.$txt);
+				rcmail::get_instance()->write_log('identity_switch', basename($file).'('.$line.'): '.$txt);
 			break;
 
 		default:

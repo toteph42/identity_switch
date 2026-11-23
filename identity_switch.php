@@ -5,7 +5,7 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
@@ -20,12 +20,10 @@ declare(strict_types=1);
  * 		logging					loggin level to 'logs/identity_switch.log'
  * 		check					allow new mail checking
  *  	lsize					dropdown selection line size
- *  	lock					lock status for tabel updates
  *  	init					initial new mail check performed
  *
  * 	[n]							identity configuration data
  *		_unseen					# of unseen messages
- *		_old					last # of unseen messages
  *		_notify					notify user flag
  *		_checked				last time checked for new mail
  *
@@ -135,20 +133,27 @@ class identity_switch extends identity_switch_cfg
 		$acc = [];
 		$ctl = [];
 		$n   = 0;
-		foreach (self::get() as $k => $v)
+		foreach (self::get() as $key => $rec)
 		{
-			if (!is_numeric($k) || $v['isw_label'] == '')
+			// only check plugin supported identities
+			if (!is_numeric($key) || $rec['isw_label'] == '')
 				continue;
-			$acc[rcube::Q($v['isw_label'])] = [ 'iid' => $k, 'unseen' => $v['_unseen'] ];
-			// compute delay timer
-			if (!($wait = $v['isw_refresh_interval']))
+
+			$acc[rcube::Q($rec['isw_label'])] = [ 'iid' => $key, 'unseen' => $rec['_unseen'] ];
+
+			// check for new mais?
+			if (!($wait = $rec['isw_refresh_interval']))
 				continue;
-			$ctl[$n]['iid'] = $k;
-			if (time() > $v['_checked'])
-				self::set($k, '_checked', time() + $wait);
+
+			$ctl[$n]['iid'] = $key;
+
+			// new time to check?
+			if (time() > $rec['_checked'])
+				self::set($key, '_checked', time() + $wait);
 			else
-				$wait = $v['_checked'] - time();
-			$ctl[$n++]['wait'] = $wait;
+				$wait = $rec['_checked'] - time();
+			$ctl[$n]['wait'] = $wait;
+			$ctl[$n++]['name'] = $rec['isw_label'];
 		}
 
 		// swap initialization status
@@ -156,7 +161,7 @@ class identity_switch extends identity_switch_cfg
 		self::set('cfg', 'init', true);
 
 		// swap logging status
-		$ctl[0]['logging'] = self::get('cfg', 'cfg_logging');
+		$ctl[0]['logging'] = self::get('cfg', 'logging');
 
 		// start checking for new mails
 		if ($n)
@@ -194,7 +199,7 @@ class identity_switch extends identity_switch_cfg
 			$div   = '<div id="identity_switch_menu"'.
 				     ' class="form-control"'.
 				     ' onclick="identity_switch_toggle_menu('.$off * $size.')"'.
-				     ' style="background-color: transparent; height: 30px;width: 90% padding-left: 10px;">'.
+				     ' style="background-color: transparent; height: 30px;width: 90%; padding-left: 10px;">'.
 				     rcube::Q(self::get($iid, 'isw_label'));
 
 			$div .= '<div id="identity_switch_dropdown" style="line-height:'.$size.'px;'.
@@ -243,31 +248,34 @@ class identity_switch extends identity_switch_cfg
 		if (!($rec = self::get(self::get('cfg', 'iid'))))
 			return $args;
 
-		foreach ( [ 'auth_type' => 0, 'skip_deleted' => 0, 'auth_cid' => 0,
-					'debug' => 0, 'force_caps' => 0, 'disabled_caps' => 1, 'socket_options' => 0,
-					'timeout' => 0, 'driver' => 0, 'language' => 0, 'host' => 0, 'user' => 0,
-					'port' => 0, 'ssl' => 0, 'password' => 0,
-					// added for buggy RC 1.7.1 -> #10221
-					// 'auth_pw' => 0,
-					'pass' => 0,
-					'message_flags' => 1,
-					'ssl_mode' => 0, 'attempt' => 0, 'retry' => 0 ] as $key => $typ)
+		// 0-Variable
+		// 1-Array
+		foreach ( [ 'auth_type' 	=> 0,	// isw_imap_auth_type
+					'skip_deleted' 	=> 0, 	// isw_imap_skip_deleted
+					'auth_cid' 		=> 0,	// isw_imap_auth_cid
+					'debug' 		=> 0, 	// isw_imap_debug
+					'force_caps' 	=> 0, 	// isw_imap_force_caps
+					'disabled_caps' => 1, 	// isw_imap_disabled_caps
+					'socket_options'=> 0,	// isw_imap_socket options
+					'timeout' 		=> 0, 	// isw_imap_timeout
+					'driver' 		=> 0, 	// isw_imap_driver
+					'language' 		=> 0, 	// isw_imap_language
+					'host' 			=> 0, 	// isw_imap_host
+					'user' 			=> 0,	// isw_imap_user
+					'port' 			=> 0, 	// isw_imap_port
+					'ssl' 			=> 0, 	// isw_imap_auth
+					'pass' 			=> 0,	// isw_imap_pass
+					'message_flags' => 1,	// isw_imap_message_flags
+					'ssl_mode' 		=> 0,	// see isw_imap_auth
+					'attempt' 		=> 0, 	// isw_imap_attempt
+					'retry' 		=> 0, 	// isw_imap_retry
+					] as $key => $typ)
 		{
-			if ($key == 'language')
-			{
-				$args[$key] = self::get('cfg', $key);
-				continue;
-			}
-
-			if ($key == 'ssl_mode')
-				$int = 'isw_imap_ssl';
-			elseif (strpos($key, 'pass') !== false)
+			$int = 'isw_imap_'.$key;
+			if ($key == 'password')
 				$int = 'isw_imap_pass';
-			else
-				$int = 'isw_imap_'.$key;
-
-			if ($key == 'debug')
-				$rec[$int] = self::get('cfg', 'imap_debug');
+			elseif ($key == 'ssl_mode' || $key == 'ssl')
+				$int = 'isw_imap_auth';
 
 			$args[$key] = $int == 'isw_imap_pass' ? rcmail::get_instance()->decrypt($rec[$int]) :
 						  ($typ ? (array)$rec[$int] : $rec[$int]);
@@ -292,12 +300,21 @@ class identity_switch extends identity_switch_cfg
 
 		$rc = rcmail::get_instance();
 
-		foreach ( [ 'smtp_host' => 0, 'smtp_user' => 0, 'smtp_pass' => 0, 'smtp_auth_cid' => 0,
-					'smtp_auth_pw' => 0, 'smtp_auth_type' => 0, 'smtp_helo_host' => 0,
-					'smtp_timeout' => 0, 'smtp_conn_options' => 1,
-					// smtp_auth_callbacks - not supported
-					// smtp_smtp_debug - not supported
-					'gssapi_context' => 0, 'gssapi_cn' => 0, ] as $key => $typ)
+		// 0-Variable
+		// 1-Array
+		foreach ( [ 'smtp_host' 		=> 0, 	// isw_smtp_host
+					'smtp_user' 		=> 0, 	// isw_smtp_user
+					'smtp_auth_cid' 	=> 0, 	// isw_smtp_auth_cid
+					'smtp_pass' 		=> 0, 	// isw_smtp_pass
+					// smtp_auth_pw, 			// not supported
+					'smtp_auth_type'	=> 0, 	// isw_smtp_auth_type
+					'smtp_helo_host'	=> 0, 	// isw_smtp_helo_host
+					'smtp_timeout' 		=> 0, 	// isw_smtp_timeout
+					'smtp_conn_options'	=> 1, 	// isw_smtp_comm_options
+					// smtp_auth_callbacks 		// not supported
+					'gssapi_context' 	=> 0, 	// isw_smtp_gssapi_contect
+					'gssapi_cn' 		=> 0, 	// isw_smtp_gssapi_cnn
+					] as $key => $typ)
 		{
 			$int = 'isw_'.$key;
 
@@ -311,8 +328,8 @@ class identity_switch extends identity_switch_cfg
 			if ($key == 'smtp_host')
 			{
 				$host = (string)$rec[$int];
-				if (isset($rec['isw_smtp_ssl']))
-					$host = $rec['isw_smtp_ssl'].'://'.$host;
+				if (isset($rec['isw_smtp_auth']) && $rec['isw_smtp_auth'] != 'none')
+					$host = $rec['isw_smtp_auth'].'://'.$host;
 				if (isset($rec['isw_smtp_port']))
 					$host .= ':'.$rec['isw_smtp_port'];
 				$args[$key] = $host;
@@ -327,8 +344,9 @@ class identity_switch extends identity_switch_cfg
 
 	/**
 	 * 	Check for flagging of mails
+	 * 	@return array
 	 */
-	function check_flag($args) {
+	function check_flag($args): array {
 
 		// action available?
 		if (!isset($args['action']))
@@ -346,17 +364,19 @@ class identity_switch extends identity_switch_cfg
 			return $args;
 
 		$unseen = $_SESSION['unseen_count'][$_SESSION['mbox']];
+		$rc  	= rcmail::get_instance();
 
 		switch ($args['action'])
 		{
 		// move to trash?
 		case 'move':
-			$rc  = rcmail::get_instance();
 			$box = $rc->config->get('trash_mbox');
 
-			// is it trash box?
-			if ($box != rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST))
-				return $args;
+			// do we check all folder?
+			if (self::get($iid, 'isw_check_all_folders') == '1')
+				// only count moves to trash box
+				if ($box != rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST))
+					return $args;
 
 			// check message flag
 			foreach (explode(',', rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST)) as $uid)
@@ -369,9 +389,22 @@ class identity_switch extends identity_switch_cfg
             }
 			break;
 
-		// composing message makes mail unread
+		// replying/fowarding message makes mail unread!
 		case 'compose':
-			$unseen--;
+			if (!($uids = rcube_utils::get_input_value('_reply_uid', rcube_utils::INPUT_GET)))
+				$uids = rcube_utils::get_input_value('_forward_uid', rcube_utils::INPUT_GET);
+
+			if (!$uids)
+				break;
+
+			foreach (explode(',', $uids) as $uid)
+			{
+				$storage = $rc->get_storage();
+				$storage->set_options(['all_headers' => true]);
+				$head = $storage->get_message_headers($uid, $_SESSION['mbox']);
+				if (!isset($head->flags['SEEN']))
+					$unseen--;
+			}
 			break;
 
 		// check flag
@@ -399,15 +432,10 @@ class identity_switch extends identity_switch_cfg
 			return $args;
 		}
 
-		// catch overflow
-		if ($unseen < 0)
-			$unseen = 0;
-
-		if (($old = self::get($iid, '_unseen')) <> $unseen)
+		if (self::get($iid, '_unseen') <> $unseen)
 		{
-			self::set($iid, '_old', $old);
-		    self::set($iid, '_unseen',  $unseen);
-			self::swap($iid);
+			self::set($iid, '_unseen',  $unseen);
+		    self::notify($iid);
 		}
 
 		return $args;
@@ -444,7 +472,7 @@ class identity_switch extends identity_switch_cfg
 	/**
 	 * 	Check for new mail
 	 */
-	function check_newmail()
+	function check_newmail(): void
 	{
 		$rc = rcmail::get_instance();
 
@@ -453,7 +481,7 @@ class identity_switch extends identity_switch_cfg
 			return;
 		}
 
-		// get iid to check
+		// get iid to check (set by Jvascript)
 		$iid = (int)rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST);
 		$rec = self::get($iid);
 
@@ -462,35 +490,38 @@ class identity_switch extends identity_switch_cfg
 
 		$siid = self::get('cfg', 'iid');
 
-		// connect
+		// switch active identity to get on_storage_connect() working
 		self::set('cfg', 'iid', $iid);
 
+		// connect
 		$storage = $rc->get_storage();
-		for ($n = 0; $n < self::get('cfg', 'retries'); $n++)
+		for ($n = 0, $try = self::get('cfg', 'retries'); $n < $try; $n++)
 		{
-			// parameters were set by on_storage_connect()
+			// parameters were set by on_storage_connect() function
 			if ($storage->connect('', '', ''))
 				break;
 			usleep(self::get('cfg', 'delay'));
 		}
-		if ($n == self::get('cfg', 'retries'))
-		{
-			self::write_log(__FILE__, __LINE__, self::LVL_EXEC,
-							sprintf('%03d', $iid).': Cannot connect to "'.
-							$rec['isw_imap_ssl'].'://'.$rec['isw_imap_host'].':'.$rec['isw_imap_port'].
-							'" for user "'.$rec['isw_imap_user'].'"');
-			return;
-		}
 
 		// restore actual identity
 		self::set('cfg', 'iid', $siid);
+
+		if ($n == $try)
+		{
+			self::write_log(__FILE__, __LINE__, self::LVL_EXEC,
+							sprintf('%03d', $iid).': Cannot connect to "'.
+							($rec['isw_imap_auth'] ? $rec['isw_imap_auth'].'://' : '').
+							$rec['isw_imap_host'].($rec['isw_imap_port'] ? ':'.$rec['isw_imap_port'] : '').
+							'" for user "'.$rec['isw_imap_user'].'"');
+			return;
+		}
 
 		// get list of all subscribed folders
 		$storage = $rc->get_storage();
 		$folders = [ 'INBOX' ];
 
 		if ($rec['isw_check_all_folders'] == '1')
-			$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
+			$folders += $storage->list_folders_subscribed('', '*', null, null, true);
 
 		// drop exception folders (and their subfolders)
 		foreach (rcube_storage::$folder_types as $val)
@@ -510,22 +541,21 @@ class identity_switch extends identity_switch_cfg
 	    if ($unseen <> $rec['_unseen'])
 	    {
 			self::write_log(__FILE__, __LINE__, self::LVL_EXEC,
-							sprintf('%03d', $iid).': '.$unseen.' new mails found'.
-							' (old value: '.$rec['_unseen'].')');
-			self::set($iid, '_old', $rec['_unseen']);
+							sprintf('%03d', $iid).': '.$unseen.' new mail(s) found'.
+							' (old value: '.$rec['_unseen'].') for "'.$rec['isw_label'].'"');
 			if ($unseen > $rec['_unseen'])
 		    	self::set($iid, '_notify', true);
 			self::set($iid, '_unseen', $unseen);
-		    self::swap($iid);
+		    self::notify($iid);
 	    }
 	}
 
 	/**
-	 * 	Swap unseen counter and notify
+	 * 	Show unseen counter and notify
 	 *
 	 * 	@param 	$iid int
 	 */
-	function swap(int $iid)
+	function notify(int $iid): void
 	{
 		$rc = rcmail::get_instance();
 
@@ -537,7 +567,8 @@ class identity_switch extends identity_switch_cfg
 					'autoplay'		=> rawurlencode($this->gettext('isw.notify.err.autoplay')),
 					'notification'	=> rawurlencode($this->gettext('isw.notify.err.notification')),
 					'title'			=> rawurlencode($this->gettext('isw.notify.title')),
-					'logging'		=> self::get('cfg', 'cfg_logging'),
+					'logging'		=> self::get('cfg', 'logging'),
+					'name'			=> self::get($iid, 'isw_label'),
 		];
 
 		$rec = self::get($iid);
@@ -545,7 +576,6 @@ class identity_switch extends identity_switch_cfg
 		// provide unseen information to browser
 		$ctl[1]['iid'] 	  = $iid;
 		$ctl[1]['unseen'] = $rec['_unseen'];
-		$ctl[1]['old']    = $rec['_old'];
 
 		// should we notify?
 		if ($rec['_notify'])

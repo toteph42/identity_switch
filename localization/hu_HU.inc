@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany.
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
 */
 $labels = [];
 
@@ -32,10 +32,10 @@ $labels['idsw.imap.user'] = 'Felhasználónév';
 $labels['idsw.imap.pass'] = 'Jelszó';
 $labels['idsw.imap.host'] = 'Szerver gépneve';
 $labels['idsw.imap.port'] = 'Port';
-$labels['idsw.imap.ssl'] = 'Titkosítás';
-$labels['idsw.imap.ssl.none'] = 'Nincs';
-$labels['idsw.imap.ssl.ssl'] = 'SSL';
-$labels['idsw.imap.ssl.tls'] = 'TLS';
+$labels['idsw.imap.auth'] = 'Titkosítás';
+$labels['idsw.imap.auth.none'] = 'Nincs';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
 $labels['idsw.imap.delimiter'] = 'Mappahierarchia elválasztó';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
@@ -44,7 +44,7 @@ $labels['idsw.smtp.pass'] = 'Jelszó';
 $labels['idsw.smtp.host'] = 'Szerver gépneve';
 $labels['idsw.smtp.tls'] = 'Biztonságos kapcsolat (TLS)';
 $labels['idsw.smtp.port'] = 'Port';
-$labels['idsw.smtp.ssl'] = 'Titkosítás';
-$labels['idsw.smtp.ssl.none'] = 'Nincs';
-$labels['idsw.smtp.ssl.ssl'] = 'SSL';
-$labels['idsw.smtp.ssl.tls'] = 'TLS';
+$labels['idsw.smtp.auth'] = 'Titkosítás';
+$labels['idsw.smtp.auth.none'] = 'Nincs';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';

@@ -5,7 +5,7 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 $labels = [];
 
@@ -32,10 +32,10 @@ $labels['idsw.imap.user'] = 'Имя пользователя';
 $labels['idsw.imap.pass'] = 'Пароль';
 $labels['idsw.imap.host'] = 'Имя сервера';
 $labels['idsw.imap.port'] = 'Порт';
-$labels['idsw.imap.ssl'] = 'Шифрование';
-$labels['idsw.imap.ssl.none'] = 'Нет';
-$labels['idsw.imap.ssl.ssl'] = 'SSL';
-$labels['idsw.imap.ssl.tls'] = 'TLS';
+$labels['idsw.imap.auth'] = 'Шифрование';
+$labels['idsw.imap.auth.none'] = 'Нет';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
 $labels['idsw.imap.delimiter'] = 'Разделитель папок';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
@@ -44,7 +44,7 @@ $labels['idsw.smtp.pass'] = 'Пароль';
 $labels['idsw.smtp.host'] = 'Имя сервера';
 $labels['idsw.smtp.tls'] = 'Защищенное соединение (TLS)';
 $labels['idsw.smtp.port'] = 'Порт';
-$labels['idsw.smtp.ssl'] = 'Шифрование';
-$labels['idsw.smtp.ssl.none'] = 'Нет';
-$labels['idsw.smtp.ssl.ssl'] = 'SSL';
-$labels['idsw.smtp.ssl.tls'] = 'TLS';
+$labels['idsw.smtp.auth'] = 'Шифрование';
+$labels['idsw.smtp.auth.none'] = 'Нет';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';

@@ -5,7 +5,7 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 $labels = [];
 
@@ -18,7 +18,6 @@ $labels['isw.notify.timeout'] = 'Close desktop notification';
 $labels['isw.notify.sound'] = 'Play sound for new messages';
 $labels['isw.notify.test'] = 'Test';
 $labels['isw.used.prefs'] = 'Preferences managed by identity_switch plugin';
-$labels['isw.hide.prefs'] = 'Preferences were hidden according to plugin configuration.';
 $labels['isw.identity'] = 'Identity';
 $labels['isw.notify.title'] = 'New Emails';
 $labels['isw.notify.msg'] = '%d for %s';
@@ -27,25 +26,26 @@ $labels['isw.notify.err.autoplay'] = 'Cannot play sound file!'."\r\n".
 $labels['isw.notify.err.notification'] = 'Cannot send notification!'."\r\n".
 									 'Please check your "Notification" settings for this page in your browser.';
 
+$labels['isw.hide.prefs'] = 'Preferences were hidden according to plugin configuration.';
+
 $labels['idsw.imap.caption'] = 'IMAP';
 $labels['idsw.imap.user'] = 'Username';
-$labels['idsw.imap.pwd'] = 'Password';
+$labels['idsw.imap.pass'] = 'Password';
 $labels['idsw.imap.host'] = 'Server hostname';
 $labels['idsw.imap.port'] = 'Port';
-$labels['idsw.imap.ssl'] = 'Encryption';
-$labels['idsw.imap.ssl.none'] = 'None';
-$labels['idsw.imap.ssl.ssl'] = 'SSL';
-$labels['idsw.imap.ssl.tls'] = 'TLS';
+$labels['idsw.imap.auth'] = 'Encryption';
+$labels['idsw.imap.auth.none'] = 'None';
+$labels['idsw.imap.auth.ssl'] = 'SSL';
+$labels['idsw.imap.auth.tls'] = 'TLS';
 $labels['idsw.imap.delimiter'] = 'Folder hierarchy delimiter';
 
 $labels['idsw.smtp.caption'] = 'SMTP';
 $labels['idsw.smtp.user'] = 'Username';
-$labels['idsw.smtp.pwd'] = 'Password';
+$labels['idsw.smtp.pass'] = 'Password';
 $labels['idsw.smtp.host'] = 'Server hostname';
 $labels['idsw.smtp.tls'] = 'Secure connection (TLS)';
 $labels['idsw.smtp.port'] = 'Port';
-$labels['idsw.smtp.ssl'] = 'Encryption';
-$labels['idsw.smtp.ssl.none'] = 'None';
-$labels['idsw.smtp.ssl.ssl'] = 'SSL';
-$labels['idsw.smtp.ssl.tls'] = 'TLS';
-
+$labels['idsw.smtp.auth'] = 'Encryption';
+$labels['idsw.smtp.auth.none'] = 'None';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';

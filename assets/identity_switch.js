@@ -2,7 +2,7 @@
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 // plugin initialization
@@ -34,8 +34,10 @@ function identity_switch_newmail(ctl)
 		if (ctl[0].logging == '2')
 		{
 			var d = new Date();
-			console.log(d.toLocaleString('de-DE') + ' ' + ctl[i].iid + ': Start ckecking in ' + ctl[i].wait + ' seconds'); 
+			console.log(d.toLocaleString('de-DE') + ' IID: ' + ctl[i].iid + ' Start ckecking in ' + 
+						ctl[i].wait + ' seconds (' + ctl[i].name + ')'); 
 		}
+		
 		setInterval(identity_switch_check_newmail, ctl[i].wait * 1000, ctl[i].iid);
 	}
 }
@@ -49,7 +51,7 @@ function identity_switch_check_newmail(iid)
 // switch identity
 function identity_switch_run(iid) 
 {
-    rcmail.env.unread_counts = {};
+	rcmail.env.unread_counts = {};
 	rcmail.http_post('plugin.identity_switch_run', { 'identity_switch_iid': iid });
 }
 
@@ -75,7 +77,7 @@ function identity_switch_notify(ctl)
 		{
 			var d = new Date();
 			console.log(d.toLocaleString('de-DE') + ' ' + ctl[i].iid + ': Changing unseen from ' + 
-						ctl[i].old + ' to ' + ctl[i].unseen);
+						ctl[i].old + ' to ' + ctl[i].unseen + ' (' + ctl[i].name + ')');
 		}
 		
 		// check for notification
@@ -188,17 +190,6 @@ $(document).click(function(event)
 			d.hide();
     }
 });
-
-// stop notification
-function identity_switch_stop_notify(prop)
-{
-    // revert original favicon
-    if (rcmail.env.favicon_href && rcmail.env.favicon_changed && (!prop || prop.action != 'check-recent')) 
-	{
-        $('<link rel="shortcut icon" href="'+rcmail.env.favicon_href+'"/>').replaceAll('link[rel="shortcut icon"]');
-        rcmail.env.favicon_changed = 0;
-    }
-}
 
 // change userid in composer window to select proper identity
 function identity_switch_fixIdent(iid) 

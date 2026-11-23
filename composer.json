@@ -3,20 +3,28 @@
 	"type" : "roundcube-plugin",
 	"description" : "This plugin allows users to switch between different identities (and check for new mails) in a single Roundcube session.",
 	"homepage" : "https://github.com/toteph42/identity_switch",
+	"license" : "GPL-3.0-or-later",
 	"keywords" : [
 		"identity",
 		"select identity",
-		"switch used",
-		"new mail check",
+		"switch user",
+		"check newmail",
 		"notify new mail"
 	],
-	"license" : "GPL-3.0+",
 	"authors" : [{
 			"name" : "Florian Däumling",
-			"email" : "toteph42@github.com",
-			"role" : "Developer"
+			"role" : "Author",
+			"email" : "toteph42@wb28.de"
 		}
 	],
+	"funding" : [{
+			"type" : "other",
+			"url" : "https://www.paypal.com/donate/?hosted_button_id=DS6VK49NAFHEQ"
+		}
+	],
+	"support" : {
+		"issues" : "https://github.com/toteph42/identity_switch/issues"
+	},
 	"repositories" : [{
 			"type" : "composer",
 			"url" : "https://plugins.roundcube.net"
@@ -30,9 +38,6 @@
 	"conflict" : {
 		"elm/identity_smtp" : "*",
 		"dougluce/ident_switch" : "*"
-	},
-	"support" : {
-		"issues" : "https://github.com/toteph42/identity_switch/issues"
 	},
 	"extra" : {
 		"roundcube" : {

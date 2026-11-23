@@ -5,7 +5,7 @@ declare(strict_types=1);
  * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 - 2026 Florian Daeumling, Germany. All right reserved
- * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+ * 	@license 	https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 class identity_switch_prefs extends rcube_plugin
@@ -110,10 +110,10 @@ class identity_switch_prefs extends rcube_plugin
 
 	    switch ($typ = identity_switch_cfg::get('cfg', 'typ')) {
 		case 1: 												// simple view
-			$authImap = new html_select([ 'name' => "_isw_imap_ssl" ]);
-			$authImap->add($this->gettext('idsw.imap.ssl.none'), 'none');
-			$authImap->add($this->gettext('idsw.imap.ssl.ssl'), 'ssl');
-			$authImap->add($this->gettext('idsw.imap.ssl.tls'), 'tls');
+			$authImap = new html_select([ 'name' => "_isw_imap_auth" ]);
+			$authImap->add($this->gettext('idsw.imap.auth.none'), 'none');
+			$authImap->add($this->gettext('idsw.imap.auth.ssl'), 'ssl');
+			$authImap->add($this->gettext('idsw.imap.auth.tls'), 'tls');
 
 			$args['form']['imap'] = [
 				'name' 	  => $this->gettext('idsw.imap.caption'),
@@ -124,8 +124,8 @@ class identity_switch_prefs extends rcube_plugin
 											   'type' => 'password', 'maxlength' => 128 ],
 					'isw_imap_host'	 		=> [ 'label' => $this->gettext('idsw.imap.host'),
 											   'type'  => 'text', 'maxlength' => 64 ],
-					'isw_imap_ssl' 			=> [ 'label' => $this->gettext('idsw.imap.ssl'),
-											   'value' => $authImap->show($rec['isw_imap_ssl']) ],
+					'isw_imap_auth' 		=> [ 'label' => $this->gettext('idsw.imap.auth'),
+											   'value' => $authImap->show($rec['isw_imap_auth']) ],
 					'isw_imap_port' 		=> [ 'label' => $this->gettext('idsw.imap.port'),
 										  	   'type' => 'text', 'maxlength' => 5 ],
 					'isw_imap_delimiter'	=> [ 'label' => $this->gettext('idsw.imap.delimiter'),
@@ -139,10 +139,10 @@ class identity_switch_prefs extends rcube_plugin
 	        $args['record']['isw_imap_port'] 		= $rec['isw_imap_port'];
 	        $args['record']['isw_imap_delimiter'] 	= $rec['isw_imap_delimiter'];
 
-			$authSmtp = new html_select([ 'name' => "_isw_smtp_ssl" ]);
-			$authSmtp->add($this->gettext('idsw.smtp.ssl.none'), 'none');
-			$authSmtp->add($this->gettext('idsw.smtp.ssl.ssl'), 'ssl');
-			$authSmtp->add($this->gettext('idsw.smtp.ssl.tls'), 'tls');
+			$authSmtp = new html_select([ 'name' => "_isw_smtp_auth" ]);
+			$authSmtp->add($this->gettext('idsw.smtp.auth.none'), 'none');
+			$authSmtp->add($this->gettext('idsw.smtp.auth.ssl'), 'ssl');
+			$authSmtp->add($this->gettext('idsw.smtp.auth.tls'), 'tls');
 
 			$args['form']['smtp'] = [
 				'name' 	  => $this->gettext('idsw.smtp.caption'),
@@ -153,8 +153,8 @@ class identity_switch_prefs extends rcube_plugin
 										   'type' => 'password', 'maxlength' => 128 ],
 		        	'isw_smtp_host'	 	=> [ 'label' => $this->gettext('idsw.smtp.host'),
 										   'type' => 'text', 'maxlength' => 64 ],
-					'isw_smtp_ssl' 		=> [ 'label' => $this->gettext('idsw.smtp.ssl'),
-										   'value' => $authSmtp->show($rec['isw_smtp_ssl']) ],
+					'isw_smtp_auth' 	=> [ 'label' => $this->gettext('idsw.smtp.auth'),
+										   'value' => $authSmtp->show($rec['isw_smtp_auth']) ],
 		        	'isw_smtp_port' 	=> [ 'label' => $this->gettext('idsw.smtp.port'),
 										   'type' => 'text', 'maxlength' => 5 ],
 				],
@@ -167,8 +167,10 @@ class identity_switch_prefs extends rcube_plugin
 			$args['record']['isw_smtp_host'] = $rec['isw_smtp_host'];
 	        $args['record']['isw_smtp_port'] = $rec['isw_smtp_port'];
 
+
 	        $args['isw_call'] = $rec;
 	        $args = self::mailbox($args);
+	        $args = self::general($args);
 
 		case 2:													// complex view
 			if (is_array($rec = identity_switch_cfg::get($iid)))
@@ -196,12 +198,11 @@ class identity_switch_prefs extends rcube_plugin
 	        break;
 
 		default:												// disabled
-			$cfg = rcube::Q($this->gettext('isw.hide.prefs'));
 			$t = new html_textarea();
 			$args['form']['isw_prefs'] = [
 				'name'		=> rcube::Q($this->gettext('isw.used.prefs')),
 				'type'		=> 'textarea',
-				'content'	=> $t->show($cfg, [
+				'content'	=> $t->show(rcube::Q($this->gettext('isw.hide.prefs')), [
 							   'name' 		=> '_isw_prefs',
 							   'rows' 		=> 10,
 							   'style' 		=> 'border-style=inherit',
@@ -341,21 +342,30 @@ class identity_switch_prefs extends rcube_plugin
 				foreach ([ 'isw_imap_user',
 						   'isw_imap_pass',
 						   'isw_imap_host',
-						   'isw_imap_ssl',
+						   'isw_imap_auth',
 						   'isw_imap_port',
 						   'isw_imap_delimiter',
 						   'isw_smtp_user',
 						   'isw_smtp_pass',
 						   'isw_smtp_host',
-						   'isw_smtp_ssl',
+						   'isw_smtp_auth',
 						   'isw_smtp_port',
-						   'isw_notification_timeout' ] as $k)
+						   'isw_notification_timeout',
+						   'isw_refresh_interval',
+						] as $k)
 				{
 					$v = rcube_utils::get_input_value('_'.$k, rcube_utils::INPUT_POST);
 					if (strpos($k, 'pass') && $v != '%p')
 						$prefs[$k] = rcmail::get_instance()->encrypt($v);
 					else
+					{
+						// delete transport security?
+						if (strpos($k, 'auth') && $v == 'none')
+							$v = '';
+						elseif (strpos($k, 'refresh'))
+							$v *= 60;
 						$prefs[$k] = $v;
+					}
 				}
 
 				foreach ([ 'isw_check_all_folders',
@@ -506,7 +516,8 @@ class identity_switch_prefs extends rcube_plugin
 	private function general(array $args): array
 	{
 		$rc  = rcmail::get_instance();
-		$iid = identity_switch_cfg::get('cfg', 'iid');
+		$iid = isset($args['record']['identity_id']) ?
+			   $args['record']['identity_id'] : identity_switch_cfg::get('cfg', 'iid');
 		$rec = identity_switch_cfg::get($iid);
 
 		$set  = &$args['blocks']['main']['options'];
@@ -520,27 +531,35 @@ class identity_switch_prefs extends rcube_plugin
 
 		// refresh interval
         $field_id = 'isw_refresh_interval';
-		if (!isset($no_override[$field_id]) && isset($field_id))
-        {
-			$sel = new html_select([ 'name' => '_'.$field_id, 'id' => $field_id, 'class' => 'custom-select']);
 
-            $sel->add($rc->gettext('never'), 0);
-			foreach ([ 1, 3, 5, 10, 15, 30, 60 ] as $min)
+        // allowed?
+		if (isset($no_override[$field_id]))
+			return $args;
+
+		$sel = new html_select([ 'name' => '_'.$field_id, 'id' => $field_id, 'class' => 'custom-select' ]);
+
+        $sel->add($rc->gettext('never'), 0);
+		foreach ([ 1, 3, 5, 10, 15, 30, 60 ] as $min)
+		{
+			if (!$mini || $mini <= $min * 60)
 			{
-				if (!$mini || $mini <= $min * 60)
-				{
-                	$label = $rc->gettext(['name' => 'everynminutes', 'vars' => ['n' => $min]]);
-					$sel->add($label, $min);
-				}
+               	$label = $rc->gettext( ['name' => 'everynminutes', 'vars' => [ 'n' => $min ] ]);
+				$sel->add($label, $min);
 			}
+		}
 
+		if (isset($args['isw_call']))
+	        $args['form'][$field_id] = [
+	        	'name'		=> rcube::Q($this->gettext('refreshinterval')),
+				'content' 	=> $sel->show($rec[$field_id] / 60),
+	       	];
+		else
 			$set[$field_id] = [
 						'title'   => html::label($field_id,
 									 rcube::Q('[ '.$this->gettext('isw.identity').': '.$rec['isw_label'].' ] '.
 								 	 $rc->gettext('refreshinterval'))),
-                        'content' => $sel->show($rec[$field_id] / 60),
+	                    'content' => $sel->show($rec[$field_id] / 60),
 			];
-		}
 
 		return $args;
 	}
